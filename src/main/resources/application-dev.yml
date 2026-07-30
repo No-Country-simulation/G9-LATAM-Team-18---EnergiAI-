@@ -1,0 +1,15 @@
+# =============================================
+# PERFIL: DESARROLLO (conexion remota a la BD PostgreSQL en OCI)
+# Activar con: --spring.profiles.active=dev
+# La IP 146.181.33.44 es la VM de OCI Compute con PostgreSQL corriendo.
+# Usuario y password se toman de variables de entorno (ver ~/.profile).
+# =============================================
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://146.181.33.44:5432/miapp}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true

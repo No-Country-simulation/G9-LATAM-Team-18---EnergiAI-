@@ -1,0 +1,30 @@
+{
+  "modelo": "LogisticRegression_multinomial",
+  "version": "1.0.0",
+  "feature_order": [
+    "consumo_kwh",
+    "uso_horario_pico_int",
+    "cantidad_equipos",
+    "tipo_inmueble_enc",
+    "horas_alto_consumo",
+    "area_inmueble",
+    "numero_personas",
+    "tiene_aire_acondicionado_int",
+    "tiene_calentador_electrico_int",
+    "tiene_iluminacion_led_int",
+    "antiguedad_electrodomesticos_enc",
+    "tarifa_electrica"
+  ],
+  "classes": ["Eficiente", "Ineficiente", "Moderado"],
+  "coef": [
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ],
+  "intercept": [0.0, 0.0, 0.0],
+  "scaler_mean": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  "scaler_scale": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "tipo_inmueble_encoding": {"Casa": 0, "Departamento": 1, "Local": 2},
+  "antiguedad_electrodomesticos_encoding": {"Nueva": 0, "Regular": 1, "Antigua": 2},
+  "tarifa_referencia_kwh": 0.75
+}

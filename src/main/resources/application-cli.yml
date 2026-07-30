@@ -1,0 +1,23 @@
+# =============================================
+# PERFIL: CLI (interfaz de consola, version 1)
+# Activar con: --spring.profiles.active=cli
+# No levanta el servidor web; ejecuta ConsoleRunner y sale al terminar.
+# Usa la misma BD (para transacciones); credenciales por variables de entorno.
+# =============================================
+spring:
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://146.181.33.44:5432/miapp}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  flyway:
+    enabled: true
+
+# Menu limpio: solo mostramos advertencias/errores del framework.
+logging:
+  level:
+    root: WARN

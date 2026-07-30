@@ -1,0 +1,13 @@
+# =============================================
+# PERFIL: PRODUCCION (BD PostgreSQL local en la misma VM de OCI Compute)
+# Activar con: --spring.profiles.active=prod
+# =============================================
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/miapp}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  flyway:
+    enabled: true
