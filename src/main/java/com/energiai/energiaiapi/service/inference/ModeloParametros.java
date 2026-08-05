@@ -65,6 +65,7 @@ public class ModeloParametros {
             @JsonProperty("scaler_mean") double[] scalerMean,
             @JsonProperty("scaler_scale") double[] scalerScale,
             @JsonProperty("tipo_inmueble_encoding") Map<String, Integer> tipoInmuebleEncoding,
+            @JsonProperty("estacion_anio_encoding") Map<String, Integer> estacionAnioEncoding,
             @JsonProperty("antiguedad_electrodomesticos_encoding") Map<String, Integer> antiguedadEncoding,
             @JsonProperty("tarifa_referencia_kwh") double tarifaReferenciaKwh
     ) {

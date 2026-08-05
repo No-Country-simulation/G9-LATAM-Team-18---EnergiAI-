@@ -10,8 +10,10 @@ import com.energiai.energiaiapi.dto.FacturaDTO;
 import com.energiai.energiaiapi.dto.ResultadoModeloDTO;
 import com.energiai.energiaiapi.repository.AnalisisRepository;
 import com.energiai.energiaiapi.repository.UsuarioRepository;
+import com.energiai.energiaiapi.service.inference.ClasificadorOnnxAdapter;
 import com.energiai.energiaiapi.service.inference.ClasificadorPort;
 import com.energiai.energiaiapi.service.inference.ModeloParametros;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import java.util.Map;
 public class AnalisisService {
 
     private static final String FUENTE_FRONTEND = "FRONTEND_ONNX";
+    private static final String FUENTE_BACKEND_ONNX = "BACKEND_ONNX";
     private static final String FUENTE_FALLBACK = "BACKEND_FALLBACK";
 
     private final ClasificadorPort clasificador;
@@ -38,24 +41,27 @@ public class AnalisisService {
     private final AnalisisRepository analisisRepository;
     private final UsuarioRepository usuarioRepository;
     private final ModeloParametros modelo;
+    private final String estrategiaModelo;
 
     public AnalisisService(ClasificadorPort clasificador,
                            CostoService costoService,
                            RecomendacionService recomendacionService,
                            AnalisisRepository analisisRepository,
                            UsuarioRepository usuarioRepository,
-                           ModeloParametros modelo) {
+                           ModeloParametros modelo,
+                           @Value("${app.modelo.estrategia:onnx}") String estrategiaModelo) {
         this.clasificador = clasificador;
         this.costoService = costoService;
         this.recomendacionService = recomendacionService;
         this.analisisRepository = analisisRepository;
         this.usuarioRepository = usuarioRepository;
         this.modelo = modelo;
+        this.estrategiaModelo = estrategiaModelo;
     }
 
     @Transactional
     public AnalisisResponse analizar(AnalisisRequest request, String emailUsuario) {
-        FacturaDTO f = request.factura();
+        FacturaDTO f = request.factura().canonicalizada();
 
         // 1. Clasificacion: preferimos el resultado del frontend; si no vino, fallback en backend.
         CategoriaEficiencia categoria;
@@ -73,14 +79,14 @@ public class AnalisisService {
             ClasificadorPort.Clasificacion c = clasificador.clasificar(f);
             categoria = c.categoria();
             probabilidades = c.probabilidades();
-            fuente = FUENTE_FALLBACK;
+            fuente = "onnx".equalsIgnoreCase(estrategiaModelo) ? FUENTE_BACKEND_ONNX : FUENTE_FALLBACK;
         }
 
         // 2. Negocio
         double costo = costoService.calcularCostoMensual(f);
         Double iie = costoService.calcularIndiceEficiencia(f);
         List<String> recomendaciones = recomendacionService.generar(f, categoria);
-        String modeloVersion = modelo.get().version();
+        String modeloVersion = resolverVersionModelo();
 
         // 3. Persistencia opcional
         boolean guardado = false;
@@ -136,17 +142,24 @@ public class AnalisisService {
         return p != null ? p : 0.0;
     }
 
+    private String resolverVersionModelo() {
+        if (clasificador instanceof ClasificadorOnnxAdapter onnx) {
+            return onnx.getVersion();
+        }
+        return modelo.get().version();
+    }
+
     private Factura mapearFactura(FacturaDTO f) {
         Factura factura = new Factura();
-        factura.setConsumoKwh(f.consumoKwh());
+        factura.setConsumoMensual(f.consumoMensual());
         factura.setUsoHorarioPico(f.usoHorarioPico());
         factura.setCantidadEquipos(f.cantidadEquipos());
         factura.setTipoInmueble(f.tipoInmueble());
-        factura.setHorasAltoConsumo(f.horasAltoConsumo());
-        factura.setAreaInmueble(f.areaInmueble());
+        factura.setHorasPromedioUso(f.horasPromedioUso());
+        factura.setEstacionAnio(f.estacionAnio());
         factura.setNumeroPersonas(f.numeroPersonas());
         factura.setTieneAireAcondicionado(f.tieneAireAcondicionado());
-        factura.setTieneCalentadorElectrico(f.tieneCalentadorElectrico());
+        factura.setTieneCalentador(f.tieneCalentador());
         factura.setTieneIluminacionLed(f.tieneIluminacionLed());
         factura.setAntiguedadElectrodomesticos(f.antiguedadElectrodomesticos());
         factura.setTarifaElectrica(f.tarifaElectrica());

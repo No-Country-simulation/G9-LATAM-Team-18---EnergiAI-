@@ -2,21 +2,20 @@ package com.energiai.energiaiapi.service.inference;
 
 import com.energiai.energiaiapi.domain.enums.CategoriaEficiencia;
 import com.energiai.energiaiapi.dto.FacturaDTO;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * Fallback de inferencia en Java puro: reimplementa el softmax de la Regresion
- * Logistica multinomial a partir de modelo_energiai.json, reproduciendo el
- * predict_proba() de scikit-learn (contrato de datos, secciones 2 y 8).
- *
- * Pasos: encoding -> imputacion -> orden feature_order -> StandardScaler ->
- * combinacion lineal por clase -> softmax -> argmax.
+ * Fallback de inferencia en Java puro: softmax leyendo modelo_energiai.json.
+ * Activo solo cuando {@code app.modelo.estrategia=local}.
  */
 @Service
+@ConditionalOnProperty(name = "app.modelo.estrategia", havingValue = "local")
 public class ClasificacionServiceLocal implements ClasificadorPort {
 
     private final ModeloParametros modelo;
@@ -26,20 +25,18 @@ public class ClasificacionServiceLocal implements ClasificadorPort {
     }
 
     @Override
-    public Clasificacion clasificar(FacturaDTO f) {
+    public Clasificacion clasificar(FacturaDTO factura) {
+        FacturaDTO f = factura.canonicalizada();
         ModeloParametros.Parametros p = modelo.get();
 
-        // 1-3. Construir el vector de 12 features en el orden del contrato, imputando faltantes.
         double[] x = construirVector(f, p);
 
-        // 4. StandardScaler: z = (x - mean) / scale
         double[] z = new double[x.length];
         for (int i = 0; i < x.length; i++) {
             double scale = p.scalerScale()[i] == 0 ? 1.0 : p.scalerScale()[i];
             z[i] = (x[i] - p.scalerMean()[i]) / scale;
         }
 
-        // 5. Puntaje por clase: score_k = intercept_k + sum_i(coef_k_i * z_i)
         int numClases = p.classes().size();
         double[] scores = new double[numClases];
         for (int k = 0; k < numClases; k++) {
@@ -50,10 +47,8 @@ public class ClasificacionServiceLocal implements ClasificadorPort {
             scores[k] = s;
         }
 
-        // 6. Softmax (estable numericamente restando el maximo)
         double[] probs = softmax(scores);
 
-        // 7. Argmax + mapeo de probabilidades por etiqueta de clase
         int ganador = 0;
         Map<String, Double> probabilidades = new LinkedHashMap<>();
         for (int k = 0; k < numClases; k++) {
@@ -72,24 +67,33 @@ public class ClasificacionServiceLocal implements ClasificadorPort {
         double[] x = new double[orden.size()];
         for (int i = 0; i < orden.size(); i++) {
             Double valor = valorCrudo(orden.get(i), f, p);
-            // Imputacion de opcionales faltantes con la media del entrenamiento.
             x[i] = (valor != null) ? valor : p.scalerMean()[i];
         }
         return x;
     }
 
-    /** Traduce cada feature del contrato a su valor numerico (o null si falta). */
     private Double valorCrudo(String feature, FacturaDTO f, ModeloParametros.Parametros p) {
         return switch (feature) {
-            case "consumo_kwh" -> f.consumoKwh() == null ? null : f.consumoKwh().doubleValue();
+            case "consumo_mensual", "consumo_kwh" -> f.consumoMensual();
             case "uso_horario_pico_int" -> boolAInt(f.usoHorarioPico());
             case "cantidad_equipos" -> f.cantidadEquipos() == null ? null : f.cantidadEquipos().doubleValue();
-            case "tipo_inmueble_enc" -> codificar(p.tipoInmuebleEncoding(), f.tipoInmueble());
-            case "horas_alto_consumo" -> f.horasAltoConsumo();
-            case "area_inmueble" -> f.areaInmueble();
+            case "tipo_inmueble_enc" -> {
+                if (f.tipoInmueble() == null || f.tipoInmueble().isBlank()) {
+                    throw new IllegalArgumentException(
+                            "tipoInmueble es obligatorio para el modelo");
+                }
+                Double code = codificar(p.tipoInmuebleEncoding(), f.tipoInmueble());
+                if (code == null) {
+                    throw new IllegalArgumentException(
+                            "tipoInmueble debe ser: monoambiente, departamento o casa");
+                }
+                yield code;
+            }
+            case "horas_promedio_uso", "horas_alto_consumo" -> f.horasPromedioUso();
+            case "estacion_anio_enc" -> codificar(p.estacionAnioEncoding(), f.estacionAnio());
             case "numero_personas" -> f.numeroPersonas() == null ? null : f.numeroPersonas().doubleValue();
             case "tiene_aire_acondicionado_int" -> boolAInt(f.tieneAireAcondicionado());
-            case "tiene_calentador_electrico_int" -> boolAInt(f.tieneCalentadorElectrico());
+            case "tiene_calentador_int", "tiene_calentador_electrico_int" -> boolAInt(f.tieneCalentador());
             case "tiene_iluminacion_led_int" -> boolAInt(f.tieneIluminacionLed());
             case "antiguedad_electrodomesticos_enc" -> codificar(p.antiguedadEncoding(), f.antiguedadElectrodomesticos());
             case "tarifa_electrica" -> f.tarifaElectrica();
@@ -101,12 +105,28 @@ public class ClasificacionServiceLocal implements ClasificadorPort {
         return b == null ? null : (b ? 1.0 : 0.0);
     }
 
+    /** Busca el codigo en el mapa de encoding de forma case/acento-insensitive. */
     private Double codificar(Map<String, Integer> encoding, String clave) {
         if (clave == null || encoding == null) {
             return null;
         }
-        Integer code = encoding.get(clave);
-        return code == null ? null : code.doubleValue();
+        Integer directo = encoding.get(clave);
+        if (directo != null) {
+            return directo.doubleValue();
+        }
+        String n = normalizar(clave);
+        for (Map.Entry<String, Integer> e : encoding.entrySet()) {
+            if (normalizar(e.getKey()).equals(n)) {
+                return e.getValue().doubleValue();
+            }
+        }
+        return null;
+    }
+
+    private static String normalizar(String s) {
+        return s.trim().toLowerCase(Locale.ROOT)
+                .replace('á', 'a').replace('é', 'e').replace('í', 'i')
+                .replace('ó', 'o').replace('ú', 'u').replace('ñ', 'n');
     }
 
     private double[] softmax(double[] scores) {

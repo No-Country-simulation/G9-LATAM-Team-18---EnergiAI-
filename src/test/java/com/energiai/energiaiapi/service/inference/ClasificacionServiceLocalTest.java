@@ -27,7 +27,7 @@ class ClasificacionServiceLocalTest {
         ClasificacionServiceLocal servicio = nuevoServicio();
 
         FacturaDTO factura = new FacturaDTO(
-                320, true, 8, "Casa", 4.5,
+                320.0, true, 8, "casa", 4.5,
                 null, null, null, null, null, null, null);
 
         ClasificadorPort.Clasificacion resultado = servicio.clasificar(factura);
@@ -40,12 +40,12 @@ class ClasificacionServiceLocalTest {
     }
 
     @Test
-    void manejaTipoInmuebleValido() throws Exception {
+    void manejaTipoInmuebleYEstacionValidos() throws Exception {
         ClasificacionServiceLocal servicio = nuevoServicio();
 
         FacturaDTO factura = new FacturaDTO(
-                500, false, 12, "Departamento", 6.0,
-                90.0, 4, true, false, true, "Antigua", 0.80);
+                500.0, false, 12, "departamento", 6.0,
+                "verano", 4, true, false, true, "mayor a 10 años", 0.80);
 
         ClasificadorPort.Clasificacion resultado = servicio.clasificar(factura);
 

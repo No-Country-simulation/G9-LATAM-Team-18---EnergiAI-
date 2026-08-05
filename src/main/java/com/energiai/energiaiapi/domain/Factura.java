@@ -22,8 +22,8 @@ public class Factura {
     private Long id;
 
     // ---------- Obligatorios ----------
-    @Column(name = "consumo_kwh", nullable = false)
-    private Integer consumoKwh;
+    @Column(name = "consumo_mensual", nullable = false)
+    private Double consumoMensual;
 
     @Column(name = "uso_horario_pico", nullable = false)
     private Boolean usoHorarioPico;
@@ -34,12 +34,12 @@ public class Factura {
     @Column(name = "tipo_inmueble", nullable = false)
     private String tipoInmueble;
 
-    @Column(name = "horas_alto_consumo", nullable = false)
-    private Double horasAltoConsumo;
+    @Column(name = "horas_promedio_uso", nullable = false)
+    private Double horasPromedioUso;
 
     // ---------- Opcionales ----------
-    @Column(name = "area_inmueble")
-    private Double areaInmueble;
+    @Column(name = "estacion_anio")
+    private String estacionAnio;
 
     @Column(name = "numero_personas")
     private Integer numeroPersonas;
@@ -47,8 +47,8 @@ public class Factura {
     @Column(name = "tiene_aire_acondicionado")
     private Boolean tieneAireAcondicionado;
 
-    @Column(name = "tiene_calentador_electrico")
-    private Boolean tieneCalentadorElectrico;
+    @Column(name = "tiene_calentador")
+    private Boolean tieneCalentador;
 
     @Column(name = "tiene_iluminacion_led")
     private Boolean tieneIluminacionLed;
@@ -66,12 +66,12 @@ public class Factura {
         return id;
     }
 
-    public Integer getConsumoKwh() {
-        return consumoKwh;
+    public Double getConsumoMensual() {
+        return consumoMensual;
     }
 
-    public void setConsumoKwh(Integer consumoKwh) {
-        this.consumoKwh = consumoKwh;
+    public void setConsumoMensual(Double consumoMensual) {
+        this.consumoMensual = consumoMensual;
     }
 
     public Boolean getUsoHorarioPico() {
@@ -98,20 +98,20 @@ public class Factura {
         this.tipoInmueble = tipoInmueble;
     }
 
-    public Double getHorasAltoConsumo() {
-        return horasAltoConsumo;
+    public Double getHorasPromedioUso() {
+        return horasPromedioUso;
     }
 
-    public void setHorasAltoConsumo(Double horasAltoConsumo) {
-        this.horasAltoConsumo = horasAltoConsumo;
+    public void setHorasPromedioUso(Double horasPromedioUso) {
+        this.horasPromedioUso = horasPromedioUso;
     }
 
-    public Double getAreaInmueble() {
-        return areaInmueble;
+    public String getEstacionAnio() {
+        return estacionAnio;
     }
 
-    public void setAreaInmueble(Double areaInmueble) {
-        this.areaInmueble = areaInmueble;
+    public void setEstacionAnio(String estacionAnio) {
+        this.estacionAnio = estacionAnio;
     }
 
     public Integer getNumeroPersonas() {
@@ -130,12 +130,12 @@ public class Factura {
         this.tieneAireAcondicionado = tieneAireAcondicionado;
     }
 
-    public Boolean getTieneCalentadorElectrico() {
-        return tieneCalentadorElectrico;
+    public Boolean getTieneCalentador() {
+        return tieneCalentador;
     }
 
-    public void setTieneCalentadorElectrico(Boolean tieneCalentadorElectrico) {
-        this.tieneCalentadorElectrico = tieneCalentadorElectrico;
+    public void setTieneCalentador(Boolean tieneCalentador) {
+        this.tieneCalentador = tieneCalentador;
     }
 
     public Boolean getTieneIluminacionLed() {

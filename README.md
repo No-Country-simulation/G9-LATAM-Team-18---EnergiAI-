@@ -18,39 +18,40 @@ recomendaciones, exponiendo todo vía API REST.
 - springdoc-openapi (Swagger UI)
 - Maven · Docker (imágenes multiarch amd64/arm64 para la VM A1.Flex de OCI)
 
-## Decisión de arquitectura clave: ¿dónde corre el modelo?
+## Decisión de arquitectura: inferencia con `version2.0.onnx`
 
-El modelo se compila a **ONNX** y corre en el **frontend** (ONNX Runtime Web).
-Por eso el backend es un **sistema de registro**, no un motor de inferencia:
+El backend clasifica con **ONNX Runtime Java** (`version2.0.onnx`, Random Forest).
+El contrato HTTP sigue siendo el de la **Factura** (5 obligatorios + 7 opcionales).
 
-1. El frontend clasifica con ONNX y envía la factura + el resultado.
-2. El backend **valida**, calcula **negocio** (costo, índice, recomendaciones) y
-   **persiste** de forma opcional.
-3. Si el resultado del frontend no viene, el backend usa un **fallback en Java**
-   (softmax leyendo `modelo_energiai.json`) detrás del puerto `ClasificadorPort`.
+1. El cliente envía `POST /api/analisis` con la factura (y opcionalmente un `resultado` ya calculado).
+2. Si no viene `resultado`, `ClasificadorOnnxAdapter` codifica **6 features** y ejecuta el ONNX.
+3. El backend calcula **negocio** (costo, índice, recomendaciones) y **persiste** si `guardar=true` + JWT.
+4. Alternativa: `app.modelo.estrategia=local` usa softmax sobre `modelo_energiai.json`.
 
 ```mermaid
 flowchart LR
-    subgraph FE[Frontend SPA]
-      ONNX[ONNX Runtime Web<br/>clasifica en el navegador]
-    end
-    subgraph BE[energiai-api - Spring Boot]
-      Ctrl[Controllers REST]
-      Port[[ClasificadorPort]]
-      Local[ClasificacionServiceLocal<br/>softmax fallback]
-      Neg[Costo / Indice / Recomendaciones]
-      Sec[JWT filter - hoy permitAll]
-      JPA[(Spring Data JPA)]
-    end
-    DB[(PostgreSQL 16<br/>Docker en VM OCI Compute)]
-    Model[/modelo_energiai.json/]
-
-    ONNX -->|POST /api/analisis| Ctrl
-    Ctrl --> Neg
-    Ctrl -.sin resultado.-> Port --> Local --> Model
-    Ctrl --> Sec
-    Ctrl --> JPA --> DB
+    FE[Cliente / Bruno / Frontend] -->|POST /api/analisis FacturaDTO| Ctrl[AnalisisController]
+    Ctrl --> Svc[AnalisisService]
+    Svc --> Port[[ClasificadorPort]]
+    Port --> Onnx[ClasificadorOnnxAdapter<br/>version2.0.onnx]
+    Port -.estrategia=local.-> Local[ClasificacionServiceLocal]
+    Svc --> Neg[Costo / IIE / Recomendaciones]
+    Svc --> JPA[(PostgreSQL)]
+    Enc[FacturaFeatureEncoder<br/>6 floats] --> Onnx
 ```
+
+### Encoding interno → ONNX (`float_input` [1,6])
+
+| Índice | Feature | Origen en Factura |
+|---|---|---|
+| 0 | consumoMensual | obligatorio |
+| 1 | usoHorarioPico (0/1) | obligatorio |
+| 2 | cantidadEquipos | obligatorio |
+| 3 | tipoInmueble enc | **obligatorio** (monoambiente=0, departamento=1, casa=2; no se imputa) |
+| 4 | horasPromedioUso | obligatorio |
+| 5 | estacionAnio enc | primavera=0 … invierno=3 (imputable) |
+
+Salida del modelo: `output_label` (`eficiente`/`moderado`/`ineficiente`) + `output_probability` (ZipMap).
 
 ## Árbol de clases (qué programar / extender)
 
@@ -112,14 +113,17 @@ com.energiai.energiaiapi
 ```json
 {
   "factura": {
-    "consumoKwh": 320,
+    "consumoMensual": 320.5,
     "usoHorarioPico": true,
     "cantidadEquipos": 8,
-    "tipoInmueble": "Casa",
-    "horasAltoConsumo": 4.5,
-    "areaInmueble": 85.0,
+    "tipoInmueble": "casa",
+    "horasPromedioUso": 4.5,
+    "estacionAnio": "verano",
     "numeroPersonas": 4,
+    "tieneAireAcondicionado": true,
+    "tieneCalentador": false,
     "tieneIluminacionLed": false,
+    "antiguedadElectrodomesticos": "menor a 5 años",
     "tarifaElectrica": 0.75
   },
   "resultado": {
@@ -129,6 +133,11 @@ com.energiai.energiaiapi
   "guardar": false
 }
 ```
+
+Valores categoricos permitidos:
+- `tipoInmueble`: `monoambiente` | `departamento` | `casa`
+- `estacionAnio`: `primavera` | `verano` | `otoño` | `invierno`
+- `antiguedadElectrodomesticos`: `menor a 3 años` | `menor a 5 años` | `menor a 10 años` | `mayor a 10 años`
 
 ## Cómo correr
 
@@ -171,9 +180,10 @@ trazabilidad completa desde el arranque: cada cambio de BD es un script versiona
 `src/main/resources/db/migration/` y queda registrado en la tabla `flyway_schema_history`.
 
 - `V1__init_schema.sql`: crea `usuario`, `factura`, `analisis`, `analisis_recomendacion`.
-- Config: `baseline-on-migrate=true`, `baseline-version=0` (permite aplicar V1 sobre la
-  BD de OCI que ya tiene objetos previos).
-- Para un cambio nuevo: agregar `V2__descripcion.sql` (nunca editar un script ya aplicado).
+- `V2__actualizar_variables_factura.sql`: actualiza columnas de `factura` (consumo float,
+  estacion del año, horas promedio, calentador).
+- Config: `baseline-on-migrate=true`, `baseline-version=0`.
+- Para un cambio nuevo: agregar `V3__descripcion.sql` (nunca editar un script ya aplicado).
 
 ## Pendiente (próximas iteraciones)
 

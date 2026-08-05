@@ -16,7 +16,7 @@ public record HistorialItemResponse(
         double probabilidad,
         double costoEstimadoMensual,
         Double indiceEficiencia,
-        Integer consumoKwh,
+        Double consumoMensual,
         String tipoInmueble,
         List<String> recomendaciones
 ) {

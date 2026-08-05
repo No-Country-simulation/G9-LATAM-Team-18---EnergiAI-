@@ -9,7 +9,7 @@ spring:
     web-application-type: none
     banner-mode: "off"
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://146.181.33.44:5432/miapp}
+    url: ${SPRING_DATASOURCE_URL}
   jpa:
     hibernate:
       ddl-auto: none

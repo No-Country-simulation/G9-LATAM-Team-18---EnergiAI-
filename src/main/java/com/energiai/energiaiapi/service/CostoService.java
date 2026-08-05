@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 /**
  * Calculos de negocio derivados (no dependen del modelo ML):
  * costo mensual estimado e indice de intensidad energetica (IIE).
+ * Tras el cambio area -> estacion, el IIE se calcula como consumo / personas.
  */
 @Service
 public class CostoService {
@@ -17,23 +18,19 @@ public class CostoService {
         this.modelo = modelo;
     }
 
-    /** costo = consumo_kwh * tarifa (individual si vino, si no la de referencia del contrato). */
+    /** costo = consumo_mensual * tarifa (individual si vino, si no la de referencia). */
     public double calcularCostoMensual(FacturaDTO f) {
         double tarifa = (f.tarifaElectrica() != null)
                 ? f.tarifaElectrica()
                 : modelo.get().tarifaReferenciaKwh();
-        return f.consumoKwh() * tarifa;
+        return f.consumoMensual() * tarifa;
     }
 
-    /** IIE = consumo_kwh / (personas * area). Null si faltan los datos opcionales. */
+    /** IIE = consumo_mensual / numero_personas. Null si no se informo el numero de personas. */
     public Double calcularIndiceEficiencia(FacturaDTO f) {
-        if (f.numeroPersonas() == null || f.areaInmueble() == null) {
+        if (f.numeroPersonas() == null || f.numeroPersonas() <= 0) {
             return null;
         }
-        double denominador = f.numeroPersonas() * f.areaInmueble();
-        if (denominador <= 0) {
-            return null;
-        }
-        return f.consumoKwh() / denominador;
+        return f.consumoMensual() / f.numeroPersonas();
     }
 }
