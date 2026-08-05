@@ -45,7 +45,7 @@ public class HistorialService {
                 a.getProbabilidad(),
                 a.getCostoEstimadoMensual(),
                 a.getIndiceEficiencia(),
-                a.getFactura() != null ? a.getFactura().getConsumoKwh() : null,
+                a.getFactura() != null ? a.getFactura().getConsumoMensual() : null,
                 a.getFactura() != null ? a.getFactura().getTipoInmueble() : null,
                 List.copyOf(a.getRecomendaciones())
         );

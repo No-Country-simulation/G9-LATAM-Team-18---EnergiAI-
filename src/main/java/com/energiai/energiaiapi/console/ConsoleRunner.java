@@ -55,15 +55,15 @@ public class ConsoleRunner implements CommandLineRunner {
         System.out.println(" DATOS OBLIGATORIOS (5)");
         System.out.println("=================================================");
 
-        Integer consumoKwh = leerEnteroPositivo("1) Consumo mensual (kWh): ", true);
-        Boolean usoHorarioPico = leerSiNo("2) ¿Uso intensivo en horario pico? (s/n): ");
-        Integer cantidadEquipos = leerEnteroPositivo("3) Cantidad de equipos electricos: ", true);
+        Double consumoMensual = leerDecimalPositivo("1) Consumo mensual (kWh): ", true);
+        Boolean usoHorarioPico = leerSiNo("2) ¿Consumo en horario pico? (s/n): ");
+        Integer cantidadEquipos = leerEnteroPositivo("3) Cantidad de electrodomesticos: ", true);
         String tipoInmueble = leerOpcion("4) Tipo de inmueble",
-                List.of("Casa", "Departamento", "Local"), true);
-        Double horasAltoConsumo = leerDecimalNoNegativo("5) Horas diarias de uso intensivo: ", true);
+                List.of("monoambiente", "departamento", "casa"), true);
+        Double horasPromedioUso = leerHorasPromedioUso("5) Horas promedio de uso diario (1-24): ");
 
         // Opcionales
-        Double areaInmueble = null;
+        String estacionAnio = null;
         Integer numeroPersonas = null;
         Boolean tieneAire = null;
         Boolean tieneCalentador = null;
@@ -76,18 +76,19 @@ public class ConsoleRunner implements CommandLineRunner {
             System.out.println(" DATOS ADICIONALES (7) - Enter para omitir cada uno");
             System.out.println("-------------------------------------------------");
 
-            areaInmueble = leerDecimalNoNegativo("6) Area del inmueble (m2): ", false);
+            estacionAnio = leerOpcion("6) Estacion del año",
+                    List.of("primavera", "verano", "otoño", "invierno"), false);
             numeroPersonas = leerEnteroPositivo("7) Numero de personas en el hogar: ", false);
             tieneAire = leerSiNoOpcional("8) ¿Tiene aire acondicionado? (s/n): ");
-            tieneCalentador = leerSiNoOpcional("9) ¿Tiene calentador electrico? (s/n): ");
+            tieneCalentador = leerSiNoOpcional("9) ¿Tiene calentador? (s/n): ");
             tieneLed = leerSiNoOpcional("10) ¿Tiene iluminacion LED? (s/n): ");
             antiguedad = leerOpcion("11) Antiguedad de electrodomesticos",
-                    List.of("Nueva", "Regular", "Antigua"), false);
+                    List.of("menor a 3 años", "menor a 5 años", "menor a 10 años", "mayor a 10 años"), false);
             tarifaElectrica = leerDecimalNoNegativo("12) Tarifa individual del kWh: ", false);
         }
 
-        return new FacturaDTO(consumoKwh, usoHorarioPico, cantidadEquipos, tipoInmueble, horasAltoConsumo,
-                areaInmueble, numeroPersonas, tieneAire, tieneCalentador, tieneLed, antiguedad, tarifaElectrica);
+        return new FacturaDTO(consumoMensual, usoHorarioPico, cantidadEquipos, tipoInmueble, horasPromedioUso,
+                estacionAnio, numeroPersonas, tieneAire, tieneCalentador, tieneLed, antiguedad, tarifaElectrica);
     }
 
     // ------------------------------------------------------------------
@@ -109,7 +110,7 @@ public class ConsoleRunner implements CommandLineRunner {
         if (r.indiceEficiencia() != null) {
             System.out.printf(" Indice eficiencia : %.3f%n", r.indiceEficiencia());
         } else {
-            System.out.println(" Indice eficiencia : (requiere area y numero de personas)");
+            System.out.println(" Indice eficiencia : (requiere numero de personas)");
         }
         System.out.println(" Fuente            : " + r.fuenteClasificacion() + " (modelo " + r.modeloVersion() + ")");
         System.out.println(" Recomendaciones   :");
@@ -153,6 +154,32 @@ public class ConsoleRunner implements CommandLineRunner {
             } catch (NumberFormatException e) {
                 System.out.println("   [!] Ingrese un numero entero valido.");
             }
+        }
+    }
+
+    /** Horas promedio de uso: obligatorio, entre 1 y 24 inclusive. */
+    private Double leerHorasPromedioUso(String prompt) {
+        while (true) {
+            Double valor = leerDecimalNoNegativo(prompt, true);
+            if (valor >= 1.0 && valor <= 24.0) {
+                return valor;
+            }
+            System.out.println("   [!] Debe estar entre 1 y 24 horas.");
+        }
+    }
+
+    /** Decimal > 0. Acepta coma o punto. */
+    private Double leerDecimalPositivo(String prompt, boolean obligatorio) {
+        while (true) {
+            Double valor = leerDecimalNoNegativo(prompt, obligatorio);
+            if (valor == null) {
+                return null;
+            }
+            if (valor <= 0) {
+                System.out.println("   [!] Debe ser un numero mayor a 0.");
+                continue;
+            }
+            return valor;
         }
     }
 

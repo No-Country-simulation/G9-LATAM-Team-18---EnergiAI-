@@ -34,9 +34,16 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
-  # Ruta del artefacto del modelo (contrato modelo_energiai.json)
   modelo:
+    # json: encodings + tarifa de referencia (+ softmax si estrategia=local)
     ruta: ${APP_MODELO_RUTA:classpath:model/modelo_energiai.json}
+    # Estrategia de clasificacion del backend: onnx (default) | local (softmax JSON)
+    estrategia: ${APP_MODELO_ESTRATEGIA:onnx}
+    # version2.0.onnx: RF 6 features -> eficiente/ineficiente/moderado
+    onnx-ruta: ${APP_MODELO_ONNX_RUTA:classpath:model/version2.0.onnx}
+    onnx-version: ${APP_MODELO_ONNX_VERSION:2.0}
+    # Legacy RF binario (10 features) — solo endpoint /api/pruebas/onnx-rf
+    onnx-rf-ruta: ${APP_MODELO_ONNX_RF_RUTA:classpath:model/modelo_rf.onnx}
   # JWT: el secreto DEBE tener >= 32 bytes. Cambiar en produccion via env var.
   jwt:
     secret: ${JWT_SECRET:cambiar-este-secreto-por-uno-seguro-de-al-menos-32-bytes}
