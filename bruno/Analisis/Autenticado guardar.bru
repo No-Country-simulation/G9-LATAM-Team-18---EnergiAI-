@@ -1,0 +1,47 @@
+meta {
+  name: Autenticado guardar
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/analisis
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "factura": {
+      "consumo_mensual": 320,
+      "uso_horario_pico": "si",
+      "cantidad_equipos": 8,
+      "tipo_inmueble": "Oficina",
+      "horas_alto_consumo": 30.0,
+      "month": 13
+      
+    },
+    "guardar": true
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.analisisId) {
+    bru.setEnvVar("analisisId", String(body.analisisId));
+  }
+}
+
+docs {
+  JWT + guardar=true. Persiste en historial.
+  resultado es opcional: si viene, fuenteClasificacion=FRONTEND_ONNX.
+  Guarda {{analisisId}} para Historial/Detalle.
+}

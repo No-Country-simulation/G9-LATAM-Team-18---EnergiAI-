@@ -1,0 +1,28 @@
+meta {
+  name: EnergiAI API
+}
+
+auth {
+  mode: none
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:8080
+}
+
+docs {
+  Collection Bruno de EnergiAI (recuperada).
+  
+  Abrir: Bruno → Open Collection → esta carpeta `bruno/`.
+  Elegir el environment Local u OCI.
+  
+  Orden sugerido:
+  1. Auth / Registro (o Login) → guarda {{token}}
+  2. Analisis / Invitado minimo
+  3. Analisis / Autenticado explorar (JWT, guardar=false → bloque costos)
+  4. Analisis / Autenticado guardar → guarda {{analisisId}}
+  5. Historial / Listar y Detalle
+  6. Pruebas ONNX si hace falta smoke del modelo
+  
+  Guía: docs/GUIA_POSTMAN_BRUNO.md
+}

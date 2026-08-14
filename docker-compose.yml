@@ -1,0 +1,41 @@
+# Reproduce en local lo que corre en la VM de OCI: app + PostgreSQL 16.
+# Variables sensibles en .env (no versionar).
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-miapp}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-oracleone18}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      JWT_SECRET: ${JWT_SECRET:-cambiar-este-secreto-por-uno-seguro-de-al-menos-32-bytes}
+      APP_RECOMENDACIONES_MODO: ${APP_RECOMENDACIONES_MODO:-hibrido}
+      APP_RECOMENDACIONES_GEMINI_MODELO: ${APP_RECOMENDACIONES_GEMINI_MODELO:-gemini-2.5-flash-lite}
+      APP_RECOMENDACIONES_GEMINI_TIMEOUT_MS: ${APP_RECOMENDACIONES_GEMINI_TIMEOUT_MS:-8000}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-miapp}
+      POSTGRES_USER: ${POSTGRES_USER:-oracleone18}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-oracleone18} -d ${POSTGRES_DB:-miapp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:

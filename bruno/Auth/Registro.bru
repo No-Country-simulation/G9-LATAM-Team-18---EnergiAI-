@@ -1,0 +1,35 @@
+meta {
+  name: Registro
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/auth/registro
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "pruebas@pruebas.com",
+    "password": "pruebas123",
+    "nombre": "Usuario de pruebas"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.token) {
+    bru.setEnvVar("token", body.token);
+  }
+}
+
+docs {
+  201 Created + JWT. Email duplicado → 409.
+  Password ≥ 8. Guarda {{token}} en el environment.
+}

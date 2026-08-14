@@ -1,0 +1,15 @@
+meta {
+  name: Sin JWT 401
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/historial
+  body: none
+  auth: none
+}
+
+docs {
+  Esperado: 401 JSON.
+}

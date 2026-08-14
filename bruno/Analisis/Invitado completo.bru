@@ -1,0 +1,44 @@
+meta {
+  name: Invitado completo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/analisis
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "factura": {
+      "consumo_mensual": 320,
+      "uso_horario_pico": "si",
+      "cantidad_equipos": 8,
+      "tipo_inmueble": "Departamento",
+      "horas_alto_consumo": 6.5,
+      "month": 7,
+      "estacion_anio": "invierno",
+      "numero_personas": 4,
+      "tiene_aire_acondicionado": true,
+      "tiene_calentador": false,
+      "tiene_iluminacion_led": true,
+      "antiguedad_electrodomesticos": "menor a 10 años",
+      "tarifa_electrica": 0.75
+    },
+    "guardar": false
+  }
+}
+
+docs {
+  Todos los campos de factura, sin JWT.
+  estacion_anio es legado: la estacion se infiere desde month (7 → invierno).
+  tiene_* solo booleanos JSON true/false.
+  antiguedad debe coincidir exacto con el allowlist.
+  Esperado: 200, sin costos ni historial_resumen, costoEstimadoMensual = 240.
+}
