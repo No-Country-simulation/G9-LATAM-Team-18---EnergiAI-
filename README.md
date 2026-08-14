@@ -19,6 +19,14 @@
 </p>
 </div> 
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white" alt="Java 21"/>
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 3.3"/>
+  <img src="https://img.shields.io/badge/ONNX-xgboost--v2-1B4E9B" alt="ONNX xgboost-v2"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 16"/>
+  <img src="https://img.shields.io/badge/OpenAPI-Swagger%20UI-85EA2D?logo=swagger&logoColor=black" alt="Swagger UI"/>
+</p>
+
 Backend del proyecto **EnergiAI** (Hackathon ONE G9 — Alura + Oracle). Analiza el consumo eléctrico de un inmueble, clasifica el perfil (**Eficiente / Moderado / Ineficiente**), estima el costo mensual y genera recomendaciones.
 
 > API operativa con **ONNX Runtime**, **JWT**, historial en PostgreSQL, **modo invitado**, OAuth2 (Google/Facebook) y recomendaciones **híbridas** (reglas + Gemini).
