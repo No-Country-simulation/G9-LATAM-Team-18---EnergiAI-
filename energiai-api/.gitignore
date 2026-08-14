@@ -1,0 +1,26 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Logs
+*.log
+
+# Secretos / entorno (NO versionar)
+.env
+env.oci
+*.key
+application-local.yml
+application-local.properties
+# Export Windows con secretos del .profile (generar localmente)
+scripts/setup-env-windows.generated.ps1
+*.generated.ps1
+
+# Paquete generado para OCI (regenerar con scripts/package-snapshot.sh)
+dist/

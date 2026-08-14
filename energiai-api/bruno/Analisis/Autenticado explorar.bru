@@ -1,0 +1,47 @@
+meta {
+  name: Autenticado explorar
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/analisis
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "factura": {
+      "consumo_mensual": 320,
+      "uso_horario_pico": "si",
+      "cantidad_equipos": 8,
+      "tipo_inmueble": "Departamento",
+      "horas_alto_consumo": 6.5,
+      "month": 7,
+      "estacion_anio": "invierno",
+      "numero_personas": 4,
+      "tiene_aire_acondicionado": true,
+      "tiene_calentador": false,
+      "tiene_iluminacion_led": true,
+      "antiguedad_electrodomesticos": "menor a 10 años",
+      "tarifa_electrica": 0.75
+    },
+    "guardar": false
+  }
+}
+
+docs {
+  JWT + guardar=false: no persiste, pero SI trae costos e historial_resumen.
+  costo_ajustado_mensual esperado 336 (240 × 1.4: invierno 10% + pico 15% + antiguedad 15%).
+  fuente_umbrales=metricas_final. benchmark Depto/invierno 249.3 / 365.7.
+  Correr Auth/Login antes.
+}

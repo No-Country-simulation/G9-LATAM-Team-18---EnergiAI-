@@ -1,0 +1,20 @@
+meta {
+  name: Detalle
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/historial/{{analisisId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Detalle de un analisis propio. 404 si no existe o es de otro usuario.
+  analisisId lo setea Analisis/Autenticado guardar.
+}

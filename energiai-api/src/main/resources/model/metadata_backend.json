@@ -1,0 +1,82 @@
+{
+    "diccionario_medias_equipos": {
+        "Casa": 18.81961557417447,
+        "Departamento": 11.149342105263157,
+        "Monoambiente": 5.046153846153846
+    },
+    "orden_columnas_transformadas": [
+        "cat__tipo_inmueble_Casa",
+        "cat__tipo_inmueble_Departamento",
+        "cat__tipo_inmueble_Monoambiente",
+        "cat__month_1",
+        "cat__month_2",
+        "cat__month_3",
+        "cat__month_4",
+        "cat__month_5",
+        "cat__month_6",
+        "cat__month_7",
+        "cat__month_8",
+        "cat__month_9",
+        "cat__month_10",
+        "cat__month_11",
+        "cat__month_12",
+        "cat__uso_horario_pico_no",
+        "cat__uso_horario_pico_si",
+        "num__horas_alto_consumo",
+        "num__cantidad_equipos",
+        "num__intensidad_por_equipo",
+        "num__horas_pico_interaccion",
+        "num__desviacion_equipos_tipo"
+    ],
+    "categorias_one_hot": {
+        "tipo_inmueble": [
+            "Casa",
+            "Departamento",
+            "Monoambiente"
+        ],
+        "month": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+        ],
+        "uso_horario_pico": [
+            "no",
+            "si"
+        ]
+    },
+    "columnas_entrada_raw": [
+        "tipo_inmueble",
+        "month",
+        "uso_horario_pico",
+        "horas_alto_consumo",
+        "cantidad_equipos",
+        "intensidad_por_equipo",
+        "horas_pico_interaccion",
+        "desviacion_equipos_tipo"
+    ],
+    "vector_referencia_ejemplo": {
+        "entrada": {
+            "tipo_inmueble": "Departamento",
+            "month": 3,
+            "uso_horario_pico": "si",
+            "horas_alto_consumo": 6.5,
+            "cantidad_equipos": 8
+        },
+        "notas_orden": {
+            "uso_horario_pico": "one-hot [no, si]: no→[1,0], si→[0,1]",
+            "numericos": "horas_alto_consumo luego cantidad_equipos"
+        },
+        "float_input": [
+            [0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -3.14934]
+        ]
+    }
+}

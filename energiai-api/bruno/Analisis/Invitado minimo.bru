@@ -1,0 +1,35 @@
+meta {
+  name: Invitado minimo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/analisis
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "factura": {
+      "consumo_mensual": 320,
+      "uso_horario_pico": "si",
+      "cantidad_equipos": 8,
+      "tipo_inmueble": "Departamento",
+      "horas_alto_consumo": 6.5,
+      "month": 3
+    },
+    "guardar": false
+  }
+}
+
+docs {
+  Sin JWT. 200, guardado=false, sin bloques costos ni historial_resumen.
+  consumo_mensual entero 80-1200. uso_horario_pico exactamente si|no.
+  month 3 → otoño (hemisferio sur).
+}

@@ -1,0 +1,96 @@
+# =============================================
+# Configuracion base (comun a todos los perfiles)
+# Los valores sensibles se inyectan por variables de entorno.
+# Perfiles: dev (OCI remoto) | prod (localhost en la VM)
+# =============================================
+spring:
+  application:
+    name: energiai-api
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/miapp}
+    username: ${SPRING_DATASOURCE_USERNAME:oracleone18}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      connection-timeout: 30000
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway es el dueño del esquema; Hibernate no lo modifica (none).
+      ddl-auto: ${JPA_DDL_AUTO:none}
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  modelo:
+    # json: encodings + tarifa de referencia (+ softmax si estrategia=local)
+    ruta: ${APP_MODELO_RUTA:classpath:model/modelo_energiai.json}
+    # Estrategia de clasificacion del backend: onnx (default) | local (softmax JSON)
+    estrategia: ${APP_MODELO_ESTRATEGIA:onnx}
+    # modelo_xgboost_v2.onnx: 22 features (one-hot + sinteticas) -> Eficiente/Moderado/Ineficiente
+    onnx-ruta: ${APP_MODELO_ONNX_RUTA:classpath:model/modelo_xgboost_v2.onnx}
+    onnx-version: ${APP_MODELO_ONNX_VERSION:xgboost-v2}
+    xgboost-metadata-ruta: ${APP_MODELO_XGBOOST_METADATA:classpath:model/metadata_backend.json}
+    # Legacy rollback: modelo_xgboost.onnx (v1) o version2.0.onnx (RF 6 features)
+    #   APP_MODELO_ONNX_RUTA=classpath:model/modelo_xgboost.onnx APP_MODELO_ONNX_VERSION=xgboost-v1
+    # Legacy RF binario (10 features) — solo endpoint /api/pruebas/onnx-rf
+    onnx-rf-ruta: ${APP_MODELO_ONNX_RF_RUTA:classpath:model/modelo_rf.onnx}
+  costos:
+    # Recargos por estacionalidad + accionables (hoja Parametros) y umbrales (metricas_final).
+    # Solo aplican al usuario autenticado (modo historial); el invitado ve consumo x tarifa.
+    ruta: ${APP_COSTOS_RUTA:classpath:model/parametros_costos.json}
+    # metricas_final = hoja metricas_final (default, etiquetado confirmado del v2)
+    # parametros     = hoja Parametros B10:E28 (rollback a umbrales originales)
+    umbrales: ${APP_COSTOS_UMBRALES:metricas_final}
+  # JWT: el secreto DEBE tener >= 32 bytes. Cambiar en produccion via env var.
+  jwt:
+    secret: ${JWT_SECRET:cambiar-este-secreto-por-uno-seguro-de-al-menos-32-bytes}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  # OAuth2 browser (redirect). El canje API (/api/auth/oauth/*) usa los mismos client-id.
+  oauth2:
+    enabled: ${APP_OAUTH2_ENABLED:false}
+    success-redirect-url: ${APP_OAUTH2_SUCCESS_REDIRECT:http://localhost:8080/oauth-callback.html}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+    facebook:
+      client-id: ${FACEBOOK_CLIENT_ID:}
+      client-secret: ${FACEBOOK_CLIENT_SECRET:}
+  recomendaciones:
+    # reglas | hibrido | gemini  (hibrido/gemini: reformula set cerrado; fallback a reglas)
+    modo: ${APP_RECOMENDACIONES_MODO:hibrido}
+    max-items: ${APP_RECOMENDACIONES_MAX_ITEMS:3}
+    gemini:
+      api-key: ${GEMINI_API_KEY:${GOOGLE_GENERATIVE_AI_API_KEY:}}
+      modelo: ${APP_RECOMENDACIONES_GEMINI_MODELO:gemini-2.5-flash-lite}
+      timeout-ms: ${APP_RECOMENDACIONES_GEMINI_TIMEOUT_MS:8000}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    display-request-duration: true
+  show-actuator: false
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+logging:
+  level:
+    org.springframework.security: INFO

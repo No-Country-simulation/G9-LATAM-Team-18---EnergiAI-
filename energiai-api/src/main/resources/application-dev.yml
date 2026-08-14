@@ -1,0 +1,21 @@
+# =============================================
+# PERFIL: DESARROLLO (conexion remota a la BD PostgreSQL en OCI)
+# Activar con: --spring.profiles.active=dev
+# Host/puerto/URL vienen de variables de entorno (ver ~/.profile):
+#   ENERGIAI_DB_HOST, ENERGIAI_DB_PORT, ENERGIAI_DB_NAME, SPRING_DATASOURCE_URL
+# =============================================
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+
+# Muestra cada peticion HTTP en la consola (CommonsRequestLoggingFilter)
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: INFO
