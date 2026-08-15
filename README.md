@@ -1,23 +1,11 @@
-<div style="text-align: center;">
-<table style="border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
-  <tr style="border: none; background: transparent;">
-    <td style="border: none; padding: 0 15px 0 0; vertical-align: middle;">
-      <img src="https://hackmd.io/_uploads/ByJV2oi8fx.png" width="70" alt="logo-energiai-icon">
-    </td>
-    <td style="border: none; padding: 0; vertical-align: middle;">
-      <div style="display: flex; flex-direction: column; gap: 2px; font-family: sans-serif;">
-        <span style="font-size: 32px; font-weight: 800; color: #203573; line-height: 1;">Energi<span style="color: #038C33;">AI</span></span>
-        <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: #6B7280; border-top: 1px solid #C7CBD1; padding-top: 4px; white-space: nowrap;">INTELIGENCIA PARA EL CONSUMO ENERGÉTICO</span>
-      </div>
-    </td>
-  </tr>
-</table>
-<p style="text-align: center;">
-  <strong>API REST de eficiencia energética</strong><br/>
-  Clasificación ONNX · costo estimado · recomendaciones con Gemini<br/>
-  <sub>Tipografía de marca: <a href="https://fonts.google.com/specimen/Poppins">Poppins</a></sub>
+<p align="center">
+  <img src="docs/assets/logo.png" width="480" alt="EnergiAI - Inteligencia para el consumo energético">
 </p>
-</div> 
+
+<p align="center">
+  <strong>API REST de eficiencia energética</strong><br/>
+  Clasificación ONNX · costo estimado · recomendaciones con Gemini
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white" alt="Java 21"/>
