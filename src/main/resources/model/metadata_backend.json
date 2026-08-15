@@ -1,8 +1,8 @@
 {
     "diccionario_medias_equipos": {
-        "Casa": 18.81961557417447,
-        "Departamento": 11.149342105263157,
-        "Monoambiente": 5.046153846153846
+        "Casa":  18.290713952403173,
+        "Departamento": 10.837505489679403,
+        "Monoambiente": 4.9766260162601625
     },
     "orden_columnas_transformadas": [
         "cat__tipo_inmueble_Casa",
@@ -76,7 +76,8 @@
             "numericos": "horas_alto_consumo luego cantidad_equipos"
         },
         "float_input": [
-            [0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -3.14934]
+            [0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -2.83751]
         ]
     }
 }
+
