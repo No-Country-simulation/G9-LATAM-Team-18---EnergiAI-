@@ -2,7 +2,7 @@
 
 Entrada ejemplo: Departamento, month=3, uso_horario_pico=si, horas_alto_consumo=6.5, cantidad_equipos=8
 
-[[0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -3.14934]]
+[[0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -2.83751]]
 
 ****** FIN JSON REFERENCIA
 
@@ -17,7 +17,7 @@ Entrada ejemplo: Departamento, month=3, uso_horario_pico=si, horas_alto_consumo=
   8.0,                                    # cantidad_equipos
   0.81249,                                # intensidad_por_equipo = horas / (equipos + 1e-5)
   6.5,                                    # horas_pico_interaccion (= horas si pico=si, else 0)
-  -3.14934                                # desviacion_equipos_tipo = equipos - media(tipo)
+  -2.83751                                # desviacion_equipos_tipo = equipos - media(tipo)
 ]
 
 ****** FIN DESGLOSE
@@ -37,7 +37,7 @@ Valores para media_segun_tipo_inmueble:
 
 JSON
 {
-  "Casa": 18.81961557417447,
-  "Departamento": 11.149342105263157,
-  "Monoambiente": 5.046153846153846
+  "Casa": 18.290713952403173,
+  "Departamento": 10.837505489679403,
+  "Monoambiente": 4.9766260162601625
 }
