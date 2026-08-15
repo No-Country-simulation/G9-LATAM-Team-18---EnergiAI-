@@ -4,7 +4,8 @@
 
 <p align="center">
   <strong>API REST de eficiencia energética</strong><br/>
-  Clasificación ONNX · costo estimado · recomendaciones con Gemini
+  Clasificación ONNX · costo estimado · recomendaciones con Gemini<br/>
+  <sub>Tipografía de marca: <a href="https://fonts.google.com/specimen/Poppins">Poppins</a></sub>
 </p>
 
 <p align="center">
