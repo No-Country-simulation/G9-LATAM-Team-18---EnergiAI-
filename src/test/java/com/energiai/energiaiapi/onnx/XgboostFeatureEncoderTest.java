@@ -20,14 +20,14 @@ class XgboostFeatureEncoderTest {
             0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f,
-            6.5f, 8.0f, 0.81249f, 6.5f, -3.14934f
+            6.5f, 8.0f, 0.81249f, 6.5f, -2.83751f
     };
 
     private static final float[] VECTOR_REF_NO = {
             0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             1.0f, 0.0f,
-            6.5f, 8.0f, 0.81249f, 0.0f, -3.14934f
+            6.5f, 8.0f, 0.81249f, 0.0f, -2.83751f
     };
 
     private XgboostFeatureEncoder encoder;
