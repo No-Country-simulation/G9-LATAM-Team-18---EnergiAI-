@@ -13,13 +13,18 @@ import java.util.List;
 /**
  * CORS para permitir que el frontend (SPA) consuma la API.
  * Los origenes permitidos se configuran con la variable app.cors.allowed-origins.
+ *
+ * Origenes por defecto:
+ * - https://energi-ai.netlify.app (produccion Netlify)
+ * - http://localhost:3000 (desarrollo React/CRA)
+ * - http://localhost:5173 (desarrollo Vite)
  */
 @Configuration
 public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-            @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}") String allowedOrigins) {
+            @Value("${app.cors.allowed-origins:https://energi-ai.netlify.app,http://localhost:3000,http://localhost:5173}") String allowedOrigins) {
 
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));

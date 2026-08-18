@@ -138,7 +138,7 @@ lines = [
     f"APP_RECOMENDACIONES_GEMINI_TIMEOUT_MS={q(os.environ.get('_E_REC_TO', '8000'))}",
     f"GEMINI_API_KEY={q(os.environ.get('_E_GEMINI', ''))}",
     "",
-    f"APP_CORS_ALLOWED_ORIGINS='http://localhost:5173,http://localhost:3000,http://localhost:8080,http://{host}:8080'",
+    f"APP_CORS_ALLOWED_ORIGINS='https://energi-ai.netlify.app,http://localhost:5173,http://localhost:3000,http://localhost:8080,http://{host}:8080'",
     "",
     "APP_OAUTH2_ENABLED=true",
     f"GOOGLE_CLIENT_ID={q(os.environ['_E_GID'])}",
