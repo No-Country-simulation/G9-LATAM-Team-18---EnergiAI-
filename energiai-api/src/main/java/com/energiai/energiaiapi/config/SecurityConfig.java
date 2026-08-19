@@ -59,6 +59,12 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/styles.css",
+                                "/app.js",
+                                "/img/**",
+                                "/fonts/**",
                                 "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
