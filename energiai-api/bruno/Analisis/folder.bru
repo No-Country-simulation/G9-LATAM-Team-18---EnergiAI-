@@ -1,0 +1,15 @@
+meta {
+  name: Analisis
+  seq: 2
+}
+
+auth {
+  mode: none
+}
+
+docs {
+  POST /api/analisis.
+  Invitado: sin JWT, guardar=false.
+  Con JWT: aparecen costos e historial_resumen aunque guardar=false.
+  guardar=true requiere Bearer y persiste en historial.
+}

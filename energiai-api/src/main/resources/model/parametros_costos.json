@@ -1,0 +1,78 @@
+{
+  "version": "datasetup-final-final-v1",
+  "origen": "Datasetup FINAL FINAL.xlsx - hoja Parametros (columnas Q..AJ) + hoja metricas_final (umbrales confirmados). Rollback de umbrales: Parametros!B10:E28.",
+  "notas": [
+    "recargo_estacional deriva de consumo_referencia_kwh: pct = (consumo_estacion / consumo_invierno) / base_aumento.",
+    "Invierno queda como techo del recargo estacional (10%).",
+    "recargo_estacional_anual es la suma de los cuatro recargos (celda D36 = 0.3415).",
+    "Los tres recargos accionables son la 'llave 15%' de la planilla (celda K2).",
+    "aire acondicionado y calentador NO generan recargo en la planilla: entran al modelo, no al costo.",
+    "umbrales_consumo_kwh es el default: hoja metricas_final (confirmado como etiquetado de entrenamiento del v2).",
+    "Coincide con metricas!I4:L24 (recalibrados). Casa queda mas holgada que Departamento.",
+    "umbrales_consumo_kwh_parametros es el rollback (Parametros!B10:E28). Switch: APP_COSTOS_UMBRALES=parametros.",
+    "Los umbrales son solo benchmark informativo; la clasificacion la hace el modelo ONNX."
+  ],
+  "base_aumento": 10.0,
+  "consumo_referencia_kwh": {
+    "primavera": 358.8,
+    "verano": 298.3,
+    "otono": 355.7,
+    "invierno": 419.3
+  },
+  "recargo_estacional": {
+    "primavera": 0.0856,
+    "verano": 0.0711,
+    "otono": 0.0848,
+    "invierno": 0.1
+  },
+  "recargo_estacional_anual": 0.3415,
+  "recargos_accionables": {
+    "horario_pico": 0.15,
+    "sin_iluminacion_led": 0.15,
+    "electrodomesticos_antiguos": 0.15
+  },
+  "antiguedad_con_recargo": [
+    "menor a 10 años",
+    "mayor a 10 años"
+  ],
+  "umbrales_consumo_kwh": {
+    "monoambiente": {
+      "primavera": { "eficiente_hasta": 132.8, "moderado_hasta": 172.8 },
+      "verano": { "eficiente_hasta": 116.6, "moderado_hasta": 156.6 },
+      "otono": { "eficiente_hasta": 127.3, "moderado_hasta": 167.3 },
+      "invierno": { "eficiente_hasta": 154.1, "moderado_hasta": 194.1 }
+    },
+    "departamento": {
+      "primavera": { "eficiente_hasta": 219.7, "moderado_hasta": 358.8 },
+      "verano": { "eficiente_hasta": 182.8, "moderado_hasta": 298.3 },
+      "otono": { "eficiente_hasta": 217.0, "moderado_hasta": 355.7 },
+      "invierno": { "eficiente_hasta": 249.3, "moderado_hasta": 365.7 }
+    },
+    "casa": {
+      "primavera": { "eficiente_hasta": 348.8, "moderado_hasta": 567.9 },
+      "verano": { "eficiente_hasta": 288.3, "moderado_hasta": 483.8 },
+      "otono": { "eficiente_hasta": 345.7, "moderado_hasta": 564.4 },
+      "invierno": { "eficiente_hasta": 409.3, "moderado_hasta": 659.3 }
+    }
+  },
+  "umbrales_consumo_kwh_parametros": {
+    "monoambiente": {
+      "primavera": { "eficiente_hasta": 91.4, "moderado_hasta": 142.8 },
+      "verano": { "eficiente_hasta": 81.5, "moderado_hasta": 126.6 },
+      "otono": { "eficiente_hasta": 85.0, "moderado_hasta": 137.3 },
+      "invierno": { "eficiente_hasta": 99.7, "moderado_hasta": 164.1 }
+    },
+    "departamento": {
+      "primavera": { "eficiente_hasta": 219.7, "moderado_hasta": 358.8 },
+      "verano": { "eficiente_hasta": 182.8, "moderado_hasta": 298.3 },
+      "otono": { "eficiente_hasta": 217.0, "moderado_hasta": 355.7 },
+      "invierno": { "eficiente_hasta": 249.3, "moderado_hasta": 419.3 }
+    },
+    "casa": {
+      "primavera": { "eficiente_hasta": 219.7, "moderado_hasta": 358.8 },
+      "verano": { "eficiente_hasta": 182.8, "moderado_hasta": 298.3 },
+      "otono": { "eficiente_hasta": 217.0, "moderado_hasta": 355.7 },
+      "invierno": { "eficiente_hasta": 249.3, "moderado_hasta": 419.3 }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+meta {
+  name: OAuth Facebook
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/auth/oauth/facebook
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "{{facebookAccessToken}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.token) {
+    bru.setEnvVar("token", body.token);
+  }
+}
+
+docs {
+  Canje de access_token de Facebook por JWT EnergiAI.
+  La app de Facebook debe pedir permiso email.
+}

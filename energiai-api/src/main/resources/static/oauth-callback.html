@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EnergiAI — Token OAuth</title>
+  <style>
+    :root {
+      --bg: #0f1c14;
+      --panel: #16261c;
+      --text: #e8f0ea;
+      --muted: #9bb0a2;
+      --ok: #3ecf8e;
+      --err: #ff7b7b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at top, #1d3a28 0%, transparent 55%),
+        var(--bg);
+    }
+    .card {
+      width: min(640px, 94vw);
+      padding: 2rem;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid #2a4434;
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+    .status { margin: 0 0 1rem; color: var(--muted); }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
+    label {
+      display: block;
+      margin: 0.75rem 0 0.35rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    textarea, input {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #2f4a3a;
+      background: #0d1711;
+      color: var(--text);
+      padding: 0.7rem 0.8rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+    }
+    textarea { min-height: 7rem; resize: vertical; }
+    .actions { display: flex; gap: 0.6rem; margin-top: 1rem; flex-wrap: wrap; }
+    button, a.btn {
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      color: #102016;
+      background: #7dffa8;
+    }
+    a.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid #2f4a3a;
+    }
+    #copied { display: none; color: var(--ok); font-size: 0.85rem; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Login OAuth completado</h1>
+    <p id="status" class="status">Leyendo token…</p>
+
+    <label for="email">Email</label>
+    <input id="email" readonly />
+
+    <label for="token">JWT (pegá esto en Bruno como {{token}})</label>
+    <textarea id="token" readonly></textarea>
+
+    <div class="actions">
+      <button type="button" id="copy">Copiar JWT</button>
+      <a class="btn secondary" href="/oauth-login.html">Volver al login</a>
+    </div>
+    <p id="copied">Token copiado al portapapeles.</p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const email = params.get("email") || "";
+    const error = params.get("error");
+    const status = document.getElementById("status");
+    const tokenEl = document.getElementById("token");
+    const emailEl = document.getElementById("email");
+
+    emailEl.value = email;
+
+    if (error) {
+      status.className = "status err";
+      status.textContent = "Error OAuth: " + error;
+    } else if (token) {
+      status.className = "status ok";
+      status.textContent = "Usuario autenticado. El JWT ya está listo para Bruno / el frontend.";
+      tokenEl.value = token;
+    } else {
+      status.className = "status err";
+      status.textContent = "No llegó ?token= en la URL. Revisá APP_OAUTH2_SUCCESS_REDIRECT.";
+    }
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      if (!tokenEl.value) return;
+      await navigator.clipboard.writeText(tokenEl.value);
+      document.getElementById("copied").style.display = "block";
+    });
+  </script>
+</body>
+</html>

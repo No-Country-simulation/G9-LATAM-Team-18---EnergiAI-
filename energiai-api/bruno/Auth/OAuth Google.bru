@@ -1,0 +1,33 @@
+meta {
+  name: OAuth Google
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/oauth/google
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "{{googleIdToken}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.token) {
+    bru.setEnvVar("token", body.token);
+  }
+}
+
+docs {
+  Canje de id_token de Google por JWT EnergiAI.
+  Pegar el id_token real en la variable de environment googleIdToken.
+}

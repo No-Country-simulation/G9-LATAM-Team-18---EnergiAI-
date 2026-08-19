@@ -1,0 +1,45 @@
+{
+  "modelo": "LogisticRegression_multinomial",
+  "version": "1.1.0",
+  "feature_order": [
+    "consumo_mensual",
+    "uso_horario_pico_int",
+    "cantidad_equipos",
+    "tipo_inmueble_enc",
+    "horas_promedio_uso",
+    "estacion_anio_enc",
+    "numero_personas",
+    "tiene_aire_acondicionado_int",
+    "tiene_calentador_int",
+    "tiene_iluminacion_led_int",
+    "antiguedad_electrodomesticos_enc",
+    "tarifa_electrica"
+  ],
+  "classes": ["Eficiente", "Ineficiente", "Moderado"],
+  "coef": [
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ],
+  "intercept": [0.0, 0.0, 0.0],
+  "scaler_mean": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  "scaler_scale": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "tipo_inmueble_encoding": {
+    "monoambiente": 0,
+    "departamento": 1,
+    "casa": 2
+  },
+  "estacion_anio_encoding": {
+    "primavera": 0,
+    "verano": 1,
+    "otoño": 2,
+    "invierno": 3
+  },
+  "antiguedad_electrodomesticos_encoding": {
+    "menor a 3 años": 0,
+    "menor a 5 años": 1,
+    "menor a 10 años": 2,
+    "mayor a 10 años": 3
+  },
+  "tarifa_referencia_kwh": 0.75
+}
