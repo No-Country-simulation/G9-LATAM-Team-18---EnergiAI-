@@ -114,7 +114,7 @@ Un mismo set de **5 perfiles**, reutilizado en notebook (ONNX vs joblib), API y 
 |---|---|---|---|---|---|---|---|
 | 1 | Eficiente claro | Departamento | 4 | no | 1.0 | 3 | 200, **Eficiente** |
 | 2 | Ineficiente claro | Casa | 7 | si | 10.0 | 22 | 200, **Ineficiente** |
-| 3 | Frontera | Departamento | 3 | si | 6.5 | 8 | 200, Moderado o Ineficiente |
+| 3 | Frontera | Casa | 8 | si | 5.5 | 10 | 240, Moderado o Ineficiente |
 | 4 | Límite válido | Departamento | 1 | no | 0.0 | 0 | 200, Eficiente; sin NaN |
 | 5 | Inválido | `"Oficina"` | 13 | si | 30.0 | 8 | **400** con `fieldErrors` (no clasifica) |
 
