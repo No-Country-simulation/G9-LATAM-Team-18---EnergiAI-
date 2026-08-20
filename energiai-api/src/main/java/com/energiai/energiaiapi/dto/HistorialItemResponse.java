@@ -57,6 +57,40 @@ public record HistorialItemResponse(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Schema(description = "Desglose estacional congelado; null en analisis previos a la V5",
                 nullable = true)
-        CostosGuardadosDTO costos
+        CostosGuardadosDTO costos,
+
+        @JsonProperty("perfil_hogar")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Schema(description = "Perfil del hogar usado en este análisis", nullable = true)
+        PerfilHogarDTO perfilHogar
 ) {
+    /**
+     * Perfil del hogar para precargar en análisis futuros.
+     */
+    @Schema(name = "PerfilHogar", description = "Datos del hogar que tienden a mantenerse entre análisis")
+    public record PerfilHogarDTO(
+            @JsonProperty("tipo_inmueble")
+            String tipoInmueble,
+
+            @JsonProperty("tiene_aire_acondicionado")
+            Boolean tieneAireAcondicionado,
+
+            @JsonProperty("tiene_iluminacion_led")
+            Boolean tieneIluminacionLed,
+
+            @JsonProperty("tiene_calentador")
+            Boolean tieneCalentador,
+
+            @JsonProperty("cantidad_equipos")
+            Integer cantidadEquipos,
+
+            @JsonProperty("antiguedad_electrodomesticos")
+            String antiguedadElectrodomesticos,
+
+            @JsonProperty("numero_personas")
+            Integer numeroPersonas,
+
+            @JsonProperty("tarifa_electrica")
+            Double tarifaElectrica
+    ) {}
 }

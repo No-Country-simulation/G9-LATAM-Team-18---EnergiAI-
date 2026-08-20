@@ -181,7 +181,23 @@ public class HistorialService {
                 a.getFactura() != null ? a.getFactura().getMes() : null,
                 a.getFactura() != null ? a.getFactura().getAnio() : null,
                 List.copyOf(a.getRecomendaciones()),
-                costosDe(a)
+                costosDe(a),
+                perfilHogarDe(a)
+        );
+    }
+
+    private static HistorialItemResponse.PerfilHogarDTO perfilHogarDe(Analisis a) {
+        if (a.getFactura() == null) return null;
+        var f = a.getFactura();
+        return new HistorialItemResponse.PerfilHogarDTO(
+                f.getTipoInmueble(),
+                f.getTieneAireAcondicionado(),
+                f.getTieneIluminacionLed(),
+                f.getTieneCalentador(),
+                f.getCantidadEquipos(),
+                f.getAntiguedadElectrodomesticos(),
+                f.getNumeroPersonas(),
+                f.getTarifaElectrica()
         );
     }
 
