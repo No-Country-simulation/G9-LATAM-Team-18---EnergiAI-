@@ -52,6 +52,19 @@ public class HistorialService {
         return aItem(analisis);
     }
 
+    @Transactional(readOnly = true)
+    public List<com.energiai.energiaiapi.controller.HistorialController.PeriodoCargado> periodosOcupadosDe(String emailUsuario) {
+        Usuario usuario = usuarioDe(emailUsuario);
+        return analisisRepository.findByUsuarioIdOrderByCreadoEnDesc(usuario.getId())
+                .stream()
+                .filter(a -> a.getFactura() != null && a.getFactura().getMes() != null)
+                .map(a -> new com.energiai.energiaiapi.controller.HistorialController.PeriodoCargado(
+                        a.getFactura().getMes(),
+                        a.getFactura().getAnio() != null ? a.getFactura().getAnio() : java.time.Year.now().getValue()))
+                .distinct()
+                .toList();
+    }
+
     /**
      * Compara el analisis en curso contra los ya persistidos del usuario. El costo se compara
      * bruto contra bruto (consumo x tarifa) porque es el unico valor presente en todos los
@@ -149,7 +162,8 @@ public class HistorialService {
     }
 
     private Usuario usuarioDe(String emailUsuario) {
-        return usuarioRepository.findByEmail(emailUsuario)
+        return usuarioRepository.findByEmailIgnoreCase(emailUsuario)
+                .or(() -> usuarioRepository.findByEmail(emailUsuario))
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + emailUsuario));
     }
 
@@ -160,10 +174,12 @@ public class HistorialService {
                 a.getCategoria(),
                 a.getProbabilidad(),
                 a.getCostoEstimadoMensual(),
+                a.getHuellaCarbonoKgCo2eMes(),
                 a.getIndiceEficiencia(),
                 a.getFactura() != null ? a.getFactura().getConsumoMensual() : null,
                 a.getFactura() != null ? a.getFactura().getTipoInmueble() : null,
                 a.getFactura() != null ? a.getFactura().getMes() : null,
+                a.getFactura() != null ? a.getFactura().getAnio() : null,
                 List.copyOf(a.getRecomendaciones()),
                 costosDe(a)
         );

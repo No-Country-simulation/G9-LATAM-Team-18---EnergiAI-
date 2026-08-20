@@ -16,10 +16,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Filtro JWT no bloqueante: si llega un token valido en Authorization: Bearer,
- * puebla el SecurityContext con el usuario. Si no llega, la request continua como
- * anonima (la app permite consultas aisladas sin sesion). El endurecimiento
- * (exigir token en ciertos endpoints) se hace en SecurityConfig.
+ * Si llega {@code Authorization: Bearer} valido, ese JWT es la identidad de la request
+ * (pisa el principal OAuth2 del handshake). Si no hay Bearer, se deja la autenticacion
+ * que ya hubiera en sesion (cookie de Google) para que {@code /api/auth/sesion} e
+ * historial sigan viendo al usuario hasta que la SPA guarde el JWT.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -41,9 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader(HEADER);
-        if (header != null && header.startsWith(PREFIJO)
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String token = header.substring(PREFIJO.length());
+        if (header != null && header.startsWith(PREFIJO)) {
+            String token = header.substring(PREFIJO.length()).trim();
             if (jwtService.esValido(token)) {
                 try {
                     String email = jwtService.extraerEmail(token);
@@ -53,9 +52,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception ignored) {
-                    // Token valido pero usuario inexistente/otro problema: seguimos como anonimo.
                     SecurityContextHolder.clearContext();
                 }
+            } else if (request.getRequestURI().startsWith("/api/")) {
+                SecurityContextHolder.clearContext();
             }
         }
 

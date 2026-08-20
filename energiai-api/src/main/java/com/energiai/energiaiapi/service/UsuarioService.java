@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -33,11 +34,12 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional
     public Usuario registrar(RegistroRequest request) {
-        if (usuarioRepository.existsByEmail(request.email())) {
-            throw new ReglaNegocioException("Ya existe un usuario con el email " + request.email());
+        String email = normalizarEmail(request.email());
+        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
+            throw new ReglaNegocioException("Ya existe un usuario con el email " + email);
         }
         Usuario usuario = new Usuario(
-                request.email(),
+                email,
                 passwordEncoder.encode(request.password()),
                 request.nombre(),
                 AuthProvider.LOCAL);
@@ -46,7 +48,7 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public Usuario autenticar(String email, String password) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = buscarPorEmail(email)
                 .orElseThrow(() -> new ReglaNegocioException("Credenciales invalidas"));
         if (usuario.getAuthProvider() != AuthProvider.LOCAL) {
             throw new ReglaNegocioException(
@@ -62,19 +64,31 @@ public class UsuarioService implements UserDetailsService {
 
     /**
      * Crea o actualiza un usuario proveniente de OAuth2 (Google/Facebook).
-     * Si el email ya existe con otro proveedor, rechaza el enlace.
+     * Si el email ya existe como LOCAL, Google se vincula (misma cuenta, JWT por email).
+     * Otro proveedor distinto sigue rechazado.
      */
     @Transactional
     public Usuario registrarOActualizarOAuth(String email,
                                              String nombre,
                                              AuthProvider provider,
                                              String providerId) {
-        Optional<Usuario> existente = usuarioRepository.findByEmail(email);
+        String mail = normalizarEmail(email);
+        Optional<Usuario> existente = buscarPorEmail(mail);
         if (existente.isPresent()) {
             Usuario usuario = existente.get();
             if (usuario.getAuthProvider() != provider) {
+                if (usuario.getAuthProvider() == AuthProvider.LOCAL && provider == AuthProvider.GOOGLE) {
+                    if (providerId != null) {
+                        usuario.setProviderId(providerId);
+                    }
+                    if ((usuario.getNombre() == null || usuario.getNombre().isBlank())
+                            && nombre != null && !nombre.isBlank()) {
+                        usuario.setNombre(nombre);
+                    }
+                    return usuarioRepository.save(usuario);
+                }
                 throw new ReglaNegocioException(
-                        "Ya existe una cuenta con el email " + email
+                        "Ya existe una cuenta con el email " + mail
                                 + " registrada via " + usuario.getAuthProvider());
             }
             if (nombre != null && !nombre.isBlank()) {
@@ -86,7 +100,7 @@ public class UsuarioService implements UserDetailsService {
             return usuarioRepository.save(usuario);
         }
 
-        Usuario usuario = new Usuario(email, null, nombre, provider);
+        Usuario usuario = new Usuario(mail, null, nombre, provider);
         usuario.setProviderId(providerId);
         return usuarioRepository.save(usuario);
     }
@@ -94,10 +108,28 @@ public class UsuarioService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = buscarPorEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
         String password = usuario.getPasswordHash() != null ? usuario.getPasswordHash() : "{noop}oauth2";
         return new User(usuario.getEmail(), password, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Usuario> buscarPorEmail(String email) {
+        String mail = normalizarEmail(email);
+        if (mail == null) {
+            return Optional.empty();
+        }
+        return usuarioRepository.findByEmailIgnoreCase(mail)
+                .or(() -> usuarioRepository.findByEmail(mail));
+    }
+
+    static String normalizarEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+        String t = email.trim().toLowerCase(Locale.ROOT);
+        return t.isEmpty() ? null : t;
     }
 }

@@ -21,6 +21,8 @@ import com.energiai.energiaiapi.service.inference.ClasificadorOnnxAdapter;
 import com.energiai.energiaiapi.service.inference.ClasificadorPort;
 import com.energiai.energiaiapi.service.inference.ModeloParametros;
 import com.energiai.energiaiapi.service.recomendacion.ContextoRecomendacion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,11 +37,13 @@ import java.util.Map;
 /**
  * Orquesta un analisis energetico:
  *  1. Toma la clasificacion del frontend (ONNX) o, si no vino, la calcula con el fallback en Java.
- *  2. Calcula negocio: costo mensual, indice de eficiencia y recomendaciones.
+ *  2. Calcula negocio: costo mensual, score de huella (kWh × 0.22 × f edad, o null), IIE y recomendaciones.
  *  3. Persiste opcionalmente en el historial (solo si guardar=true y hay usuario autenticado).
  */
 @Service
 public class AnalisisService {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalisisService.class);
 
     private static final String FUENTE_FRONTEND = "FRONTEND_ONNX";
     private static final String FUENTE_BACKEND_ONNX = "BACKEND_ONNX";
@@ -80,6 +84,7 @@ public class AnalisisService {
 
     @Transactional
     public AnalisisResponse analizar(AnalisisRequest request, String emailUsuario) {
+        long t0 = System.nanoTime();
         FacturaDTO f = request.factura().canonicalizada();
 
         // 1. Clasificacion: preferimos el resultado del frontend; si no vino, fallback en backend.
@@ -101,15 +106,18 @@ public class AnalisisService {
             fuente = "onnx".equalsIgnoreCase(estrategiaModelo) ? FUENTE_BACKEND_ONNX : FUENTE_FALLBACK;
         }
 
-        // 2. Negocio base: identico para invitado y registrado (consumo x tarifa).
+        // 2. Negocio base: identico para invitado y registrado (consumo x tarifa y huella).
         double costo = costoService.calcularCostoMensual(f);
+        Double huellaCarbono = costoService.calculoHuellaCarbono(f);
         Double iie = costoService.calcularIndiceEficiencia(f);
         String modeloVersion = resolverVersionModelo();
         XgboostFeatures features = xgboostEncoder.encodeFull(f);
 
         // 3. Modo historial: el usuario del token habilita costos estacionales y comparativa.
         Usuario usuario = (emailUsuario != null)
-                ? usuarioRepository.findByEmail(emailUsuario).orElse(null)
+                ? usuarioRepository.findByEmailIgnoreCase(emailUsuario)
+                    .or(() -> usuarioRepository.findByEmail(emailUsuario))
+                    .orElse(null)
                 : null;
         CostosEstacionalesDTO costos = (usuario != null)
                 ? calculadoraCostos.calcular(f, costo, costoService.tarifaAplicada(f))
@@ -137,8 +145,16 @@ public class AnalisisService {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "Usuario del token no encontrado en la base de datos");
             }
+            // Validar que no exista ya un análisis para este mes+año
+            String mesNormalizado = f.mes();
+            Integer anio = f.anio() != null ? f.anio() : java.time.Year.now().getValue();
+            if (analisisRepository.existsByUsuarioIdAndFacturaMesAndFacturaAnio(usuario.getId(), mesNormalizado, anio)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        String.format("Ya existe un analisis para %s/%d. Elimina el existente o elige otro periodo.",
+                                mesNormalizado, anio));
+            }
             Analisis analisis = construirAnalisis(
-                    f, usuario, categoria, probabilidades, costo, iie, modeloVersion, fuente,
+                    f, usuario, categoria, probabilidades, costo, huellaCarbono, iie, modeloVersion, fuente,
                     recomendaciones, features, costos);
             analisis = analisisRepository.save(analisis);
             guardado = true;
@@ -146,8 +162,8 @@ public class AnalisisService {
             creadoEn = analisis.getCreadoEn();
         }
 
-        return new AnalisisResponse(
-                categoria, probabilidades, costo, iie, recomendaciones,
+        AnalisisResponse response = new AnalisisResponse(
+                categoria, probabilidades, costo, huellaCarbono, iie, recomendaciones,
                 modeloVersion, fuente, guardado, analisisId, creadoEn,
                 new ConsultaModeloDTO(
                         features.tipoInmuebleDs(),
@@ -162,6 +178,10 @@ public class AnalisisService {
                 features.vector(),
                 costos,
                 resumenHistorial);
+        long totalMs = (System.nanoTime() - t0) / 1_000_000L;
+        log.info("[Analisis] response armado en {} ms (categoria={}, recs={}, fuente={}, guardar={}) antes de devolver al cliente",
+                totalMs, categoria, recomendaciones.size(), fuente, guardado);
+        return response;
     }
 
     private Analisis construirAnalisis(FacturaDTO f,
@@ -169,6 +189,7 @@ public class AnalisisService {
                                        CategoriaEficiencia categoria,
                                        Map<String, Double> probabilidades,
                                        double costo,
+                                       Double huellaCarbono,
                                        Double iie,
                                        String modeloVersion,
                                        String fuente,
@@ -183,6 +204,7 @@ public class AnalisisService {
         analisis.setCategoria(categoria);
         analisis.setProbabilidad(probabilidadDe(probabilidades, categoria));
         analisis.setCostoEstimadoMensual(costo);
+        analisis.setHuellaCarbonoKgCo2eMes(huellaCarbono);
         analisis.setIndiceEficiencia(iie);
         analisis.setModeloVersion(modeloVersion);
         analisis.setFuenteClasificacion(fuente);
@@ -233,6 +255,7 @@ public class AnalisisService {
         factura.setHorasPromedioUso(f.horasPromedioUso());
         factura.setEstacionAnio(f.estacionAnio());
         factura.setMes(f.mes());
+        factura.setAnio(f.anio() != null ? f.anio() : java.time.Year.now().getValue());
         factura.setNumeroPersonas(f.numeroPersonas());
         factura.setTieneAireAcondicionado(f.tieneAireAcondicionado());
         factura.setTieneCalentador(f.tieneCalentador());

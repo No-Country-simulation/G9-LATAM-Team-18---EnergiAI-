@@ -88,7 +88,7 @@ public class ConsoleRunner implements CommandLineRunner {
         }
 
         return new FacturaDTO(consumoMensual, usoHorarioPico, cantidadEquipos, tipoInmueble, horasPromedioUso,
-                null, mes, numeroPersonas, tieneAire, tieneCalentador, tieneLed, antiguedad, tarifaElectrica);
+                null, mes, null, numeroPersonas, tieneAire, tieneCalentador, tieneLed, antiguedad, tarifaElectrica);
     }
 
     // ------------------------------------------------------------------
