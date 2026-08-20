@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/logo.png" width="480" alt="EnergiAI - Inteligencia para el consumo energético">
+  <img src="docs/assets/banner-energiai.png" alt="EnergiAI — Inteligencia para el consumo energético" width="720"/>
 </p>
 
 <p align="center">
@@ -96,7 +96,7 @@ Campos **obligatorios** (alineados al dataset / tensor ONNX). `consumo_mensual` 
 | `horas_alto_consumo` | number | 0.0–24.0 |
 | `month` | int o string | 1–12 o nombre del mes (`enero`…`diciembre`) |
 
-Opcionales: `numero_personas`, `tiene_aire_acondicionado`, `tiene_calentador`, `tiene_iluminacion_led` (booleanos JSON), `antiguedad_electrodomesticos`, `tarifa_electrica`. `estacion_anio` es legado: la estación de negocio se infiere desde `month` (hemisferio sur).
+Opcionales: `numero_personas`, `tiene_aire_acondicionado`, `tiene_calentador`, `tiene_iluminacion_led` (booleanos JSON), `antiguedad_electrodomesticos`, `tarifa_electrica`. `estacion_anio` es legado: la estación de negocio se infiere desde `month` (calendario británico: ene–mar invierno, abr–jun primavera, jul–sep verano, oct–dic otoño).
 
 El tensor (`metadata_backend.json`) es **22 floats**: one-hot de tipo (3) + month (12) + pico `[no, si]` (2) + horas + equipos + 3 sintéticas (`intensidad_por_equipo`, `horas_pico_interaccion`, `desviacion_equipos_tipo`). La respuesta incluye `consulta_modelo`, `features_sinteticas` y `vector_onnx`.
 
@@ -108,15 +108,39 @@ Los errores de **dominio** (rangos, allowlists) se acumulan: `message` resume cu
 
 ## Casos de prueba QA
 
-Un mismo set de **5 perfiles**, reutilizado en notebook (ONNX vs joblib), API y plataforma. En Swagger aparecen como ejemplos **QA1…QA5** de `POST /api/analisis`. Consumo de negocio de referencia: **320 kWh**.
+Un mismo set de **5 perfiles**, reutilizado en notebook (ONNX vs joblib), API y plataforma. En Swagger aparecen como ejemplos **QA1…QA5** de `POST /api/analisis`.
 
-| # | Nombre | tipo | month | pico | horas | equipos | Esperado |
-|---|---|---|---|---|---|---|---|
-| 1 | Eficiente claro | Departamento | 4 | no | 1.0 | 3 | 200, **Eficiente** |
-| 2 | Ineficiente claro | Casa | 7 | si | 10.0 | 22 | 200, **Ineficiente** |
-| 3 | Frontera | Casa | 8 | si | 5.5 | 10 | 240, Moderado o Ineficiente |
-| 4 | Límite válido | Departamento | 1 | no | 0.0 | 0 | 200, Eficiente; sin NaN |
-| 5 | Inválido | `"Oficina"` | 13 | si | 30.0 | 8 | **400** con `fieldErrors` (no clasifica) |
+| # | Nombre | tipo | month | pico | horas | equipos | consumo | Esperado |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Eficiente claro | Departamento | 4 | no | 1.0 | 3 | 320 | 200, **Eficiente** |
+| 2 | Ineficiente claro | Casa | 7 | si | 10.0 | 22 | 320 | 200, **Ineficiente** |
+| 3 | Frontera | Casa | 8 | si | 5.5 | 10 | 420 | 200, ~50% Moderado / ~50% Ineficiente |
+| 4 | Límite válido | Departamento | 1 | no | 0.0 | 0 | 80 | 200, Eficiente; sin NaN |
+| 5 | Inválido | `"Oficina"` | 13 | si | 30.0 | 8 | 320 | **400** con `fieldErrors` (no clasifica) |
+
+### Caso 3 (Frontera) — JSON completo
+
+```json
+{
+  "factura": {
+    "consumo_mensual": 420,
+    "uso_horario_pico": "si",
+    "cantidad_equipos": 10,
+    "tipo_inmueble": "Casa",
+    "horas_alto_consumo": 5.5,
+    "month": 8,
+    "numero_personas": 4,
+    "tiene_aire_acondicionado": true,
+    "tiene_calentador": false,
+    "tiene_iluminacion_led": true,
+    "antiguedad_electrodomesticos": "menor a 10 años",
+    "tarifa_electrica": 0.85
+  },
+  "guardar": false
+}
+```
+
+Este caso produce probabilidades cercanas al 50% para Moderado e Ineficiente, demostrando el comportamiento en la frontera de decisión del modelo.
 
 El caso 5 cubre validación, no el modelo: `tipo_inmueble`, `month` y `horas_alto_consumo` fallan juntos.
 
@@ -210,9 +234,9 @@ mvn test
 
 Flyway es dueño del esquema (`src/main/resources/db/migration/`):
 
-- `V1` esquema inicial · `V2` variables de factura · `V3` mes · `V4` features sintéticas xgboost · `V5` costos estacionales.
+- `V1` esquema inicial · `V2` variables de factura · `V3` mes · `V4` features sintéticas xgboost · `V5` costos estacionales · `V6-V8` ajustes menores · `V9` campo año en factura · `V10` limpieza de duplicados · `V11` corrección de años históricos.
 - Config: `baseline-on-migrate=true`, `baseline-version=0`.
-- Cambio nuevo: agregar `V6__…sql` (no editar un script ya aplicado).
+- Cambio nuevo: agregar `V12__…sql` (no editar un script ya aplicado).
 
 ## Despliegue OCI
 
@@ -229,5 +253,15 @@ Solo empaquetar: `./scripts/package-snapshot.sh`. En la VM de ~1 GiB: `sudo ba
 - **Invitado:** `POST /api/analisis` con `guardar=false` (sin JWT).
 - **Registro / login / OAuth:** emiten JWT. Historial solo con `Authorization: Bearer <jwt>`.
 - **OAuth browser:** `APP_OAUTH2_ENABLED=true` + client id/secret. El canje API (`/api/auth/oauth/*`) está siempre disponible.
+
+### Frontend SPA
+
+El frontend en `/static/` maneja autenticación sin salir de la aplicación:
+
+1. **OAuth Google:** `/oauth2/authorization/google` → Google → `/oauth-callback.html#token=...` → `localStorage`
+2. **Login local:** `POST /api/auth/login` → JWT en response → `localStorage`
+3. **Llamadas API:** `Authorization: Bearer <jwt>` desde `localStorage`
+
+Detalle del flujo: [`docs/flujo-autenticacion-spa.md`](docs/flujo-autenticacion-spa.md).
 
 Variables de entorno de referencia: [`.env.example`](.env.example).

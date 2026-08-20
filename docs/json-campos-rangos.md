@@ -1,23 +1,23 @@
 ****** COMIENZO JSON REFERENCIA (float_input [1×22], orden metadata_backend.json)
 
-Entrada ejemplo: Departamento, month=3, uso_horario_pico=si, horas_alto_consumo=6.5, cantidad_equipos=8
+Entrada ejemplo (caso frontera QA3): Casa, month=8, uso_horario_pico=si, horas_alto_consumo=5.5, cantidad_equipos=10
 
-[[0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 6.5, 8.0, 0.81249, 6.5, -2.83751]]
+[[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 5.5, 10.0, 0.55, 5.5, -8.29071]]
 
 ****** FIN JSON REFERENCIA
 
 ****** DESGLOSE
 
 [
-  0.0, 1.0, 0.0,                          # tipo_inmueble one-hot: Casa, Departamento, Monoambiente
-  0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # month 1..12 (aquí mes 3)
+  1.0, 0.0, 0.0,                          # tipo_inmueble one-hot: Casa, Departamento, Monoambiente
+  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,  # month 1..12 (aquí mes 8)
   0.0, 1.0,                               # uso_horario_pico one-hot [no, si]:
                                           #   "no" → [1.0, 0.0]  |  "si" → [0.0, 1.0]
-  6.5,                                    # horas_alto_consumo
-  8.0,                                    # cantidad_equipos
-  0.81249,                                # intensidad_por_equipo = horas / (equipos + 1e-5)
-  6.5,                                    # horas_pico_interaccion (= horas si pico=si, else 0)
-  -2.83751                                # desviacion_equipos_tipo = equipos - media(tipo)
+  5.5,                                    # horas_alto_consumo
+  10.0,                                   # cantidad_equipos
+  0.55,                                   # intensidad_por_equipo = horas / (equipos + 1e-5)
+  5.5,                                    # horas_pico_interaccion (= horas si pico=si, else 0)
+  -8.29071                                # desviacion_equipos_tipo = equipos - media(Casa=18.29)
 ]
 
 ****** FIN DESGLOSE
