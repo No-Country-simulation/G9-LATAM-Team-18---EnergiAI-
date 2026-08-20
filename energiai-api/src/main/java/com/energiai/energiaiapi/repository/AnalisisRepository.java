@@ -11,4 +11,8 @@ public interface AnalisisRepository extends JpaRepository<Analisis, Long> {
     List<Analisis> findByUsuarioIdOrderByCreadoEnDesc(Long usuarioId);
 
     Optional<Analisis> findByIdAndUsuarioId(Long id, Long usuarioId);
+
+    boolean existsByUsuarioIdAndFacturaMesAndFacturaAnio(Long usuarioId, String mes, Integer anio);
+
+    Optional<Analisis> findByUsuarioIdAndFacturaMesAndFacturaAnio(Long usuarioId, String mes, Integer anio);
 }

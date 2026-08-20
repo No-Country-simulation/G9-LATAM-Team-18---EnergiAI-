@@ -44,6 +44,9 @@ public class Factura {
     @Column(name = "mes")
     private String mes;
 
+    @Column(name = "anio")
+    private Integer anio;
+
     @Column(name = "numero_personas")
     private Integer numeroPersonas;
 
@@ -133,6 +136,14 @@ public class Factura {
 
     public void setMes(String mes) {
         this.mes = mes;
+    }
+
+    public Integer getAnio() {
+        return anio;
+    }
+
+    public void setAnio(Integer anio) {
+        this.anio = anio;
     }
 
     public Integer getNumeroPersonas() {

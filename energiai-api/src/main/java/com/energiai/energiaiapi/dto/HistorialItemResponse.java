@@ -29,6 +29,12 @@ public record HistorialItemResponse(
         @Schema(example = "240.375")
         double costoEstimadoMensual,
 
+        @JsonProperty("huella_carbono_kg_co2e_mes")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Schema(description = "Score pedagógico kg CO2e / mes; omitido si ese análisis no tenía antigüedad",
+                example = "73.92", nullable = true)
+        Double huellaCarbonoKgCo2eMes,
+
         @Schema(nullable = true, example = "80.125")
         Double indiceEficiencia,
 
@@ -40,6 +46,9 @@ public record HistorialItemResponse(
 
         @Schema(nullable = true, example = "3")
         String mes,
+
+        @Schema(nullable = true, example = "2026")
+        Integer anio,
 
         @ArraySchema(schema = @Schema(example = "Evita equipos de alto consumo en horario pico."))
         List<String> recomendaciones,

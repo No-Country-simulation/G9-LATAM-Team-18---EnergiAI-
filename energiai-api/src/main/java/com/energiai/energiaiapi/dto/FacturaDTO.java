@@ -93,7 +93,8 @@ public record FacturaDTO(
         @DecimalMax(value = "24.0", message = "horas_alto_consumo no puede superar 24")
         Double horasPromedioUso,
 
-        @Schema(description = "Opcional / legado. El negocio infiere la estacion desde month (hemisferio sur). "
+        @Schema(description = "Opcional / legado. El negocio infiere la estacion desde month (calendario britanico: "
+                + "ene–mar invierno, abr–jun primavera, jul–sep verano, oct–dic otoño). "
                 + "Si se envia, debe ser un valor exacto permitido.",
                 example = "otoño",
                 allowableValues = {"primavera", "verano", "otoño", "otono", "invierno"},
@@ -119,6 +120,15 @@ public record FacturaDTO(
                 },
                 message = "month debe ser 1-12 o el nombre del mes")
         String mes,
+
+        @Schema(description = "Año del analisis (4 digitos). Si no se envia, se usa el año actual.",
+                example = "2026", nullable = true)
+        @JsonProperty("year")
+        @JsonAlias({"anio", "año"})
+        @JsonDeserialize(using = StrictIntegerDeserializer.class)
+        @Min(value = 2020, message = "year debe ser al menos 2020")
+        @Max(value = 2100, message = "year no puede superar 2100")
+        Integer anio,
 
         @Schema(description = "Personas en el hogar (opcional; null omitido)", example = "4", nullable = true)
         @JsonProperty("numero_personas")
@@ -175,6 +185,8 @@ public record FacturaDTO(
                 .map(EstacionAnio::getValor)
                 .or(() -> EstacionAnio.desde(estacionAnio).map(EstacionAnio::getValor))
                 .orElse(estacionAnio);
+        // Si no viene año, usar el año actual
+        Integer anioCanon = anio != null ? anio : java.time.Year.now().getValue();
         return new FacturaDTO(
                 consumoMensual,
                 usoHorarioPico,
@@ -183,6 +195,7 @@ public record FacturaDTO(
                 horasPromedioUso,
                 estacionCanon,
                 monthCanon,
+                anioCanon,
                 numeroPersonas,
                 tieneAireAcondicionado,
                 tieneCalentador,
@@ -192,5 +205,9 @@ public record FacturaDTO(
                         .orElse(antiguedadElectrodomesticos),
                 tarifaElectrica
         );
+    }
+
+    public Integer anio() {
+        return anio;
     }
 }

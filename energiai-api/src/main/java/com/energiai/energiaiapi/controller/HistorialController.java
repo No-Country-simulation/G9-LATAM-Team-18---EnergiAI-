@@ -69,6 +69,21 @@ public class HistorialController {
         return historialService.detalleDe(emailDe(authentication), id);
     }
 
+    @GetMapping(value = "/periodos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Periodos cargados",
+            description = "Devuelve lista de periodos (mes+año) que ya tienen análisis guardado. "
+                    + "Útil para deshabilitar opciones en el selector de fecha.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "Sin JWT",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public List<PeriodoCargado> periodosOcupados(Authentication authentication) {
+        return historialService.periodosOcupadosDe(emailDe(authentication));
+    }
+
+    public record PeriodoCargado(String mes, Integer anio) {}
+
     private static String emailDe(Authentication authentication) {
         return SecurityUtils.emailDe(authentication)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
