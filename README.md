@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner-energiai.png" alt="EnergiAI — Inteligencia para el consumo energético" width="720"/>
+  <img src="docs/assets/banner-energiai.png" alt="EnergiAI — Inteligencia para el consumo energético" width="620"/>
 </p>
 
 <p align="center">
