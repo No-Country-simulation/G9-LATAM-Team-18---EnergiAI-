@@ -265,3 +265,9 @@ El frontend en `/static/` maneja autenticación sin salir de la aplicación:
 Detalle del flujo: [`docs/flujo-autenticacion-spa.md`](docs/flujo-autenticacion-spa.md).
 
 Variables de entorno de referencia: [`.env.example`](.env.example).
+
+
+### Para ver Frontend al 21/08/2026:
+
+- **En despliegue funcional:** https://energi-ai.netlify.app
+- **Repo GitHub:** https://github.com/danielsantiagoroca/frontend-energiai
