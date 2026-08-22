@@ -3,27 +3,25 @@ title: EnergiAI - Arquitectura
 
 ---
 
+<img src="https://hackmd.io/_uploads/SyWOvF8wzg.png" width="55%">
 # 1. Visión General del Sistema
 El sistema se compone de una aplicación web moderna orientada a servicios, donde la lógica de negocio central integra un motor de Inteligencia Artificial (desarrollado por Ana y Erick). La solución combina una arquitectura de código desacoplada en capas y un despliegue optimizado en la nube sobre Oracle Cloud Infrastructure (OCI).
 
+
 Para representar la arquitectura del sistema se utilizó el Modelo C4, enfocándonos en sus dos primeros niveles de abstracción (Contexto y Contenedores), los cuales permiten visualizar de manera clara las interacciones externas y la estructura de componentes desplegados.
 
-
-
 ### 1.1 Diagrama de contexto
+
 en este diagrama se puede vizualisar sencillamente en terminos generales el como funciona la aplicacion
-
-<img width="2140" height="215" alt="diagrama de contexto" src="https://github.com/user-attachments/assets/014dd26e-a894-486c-aecd-a19c694fe6fd" />
-
+![diagrama de contexto](https://hackmd.io/_uploads/ry151UMDGx.png)
 
 ### 1.2 Diagrama de contenedores
 en este diagrama se observa el flujo en el que trabaja la aplicacion para poder generar la respuesta al usuario
-
-<img width="2732" height="1632" alt="diagrama de contenedores" src="https://github.com/user-attachments/assets/dce1c155-0e62-411f-aaee-1ef4b0aaae32" />
-
+![diagrama de contenedores](https://hackmd.io/_uploads/S1_PQIfvfx.png)
 
 # 2. capas de arquitectura
 Se utiliza una arquitectura por capas para mantener la separación de responsabilidades y facilitar la escalabilidad:
+
 
 * Capa Presentación y Aplicación: Aplicación web (Frontend) que interactúa directamente con el usuario final. Captura las variables del inmueble y el consumo energético, enviando peticiones en formato JSON mediante HTTPS hacia el servidor.
 
@@ -39,6 +37,7 @@ Se utiliza una arquitectura por capas para mantener la separación de responsabi
 
 * Capa Persistencia y Datos: Capa encargada de la gestión del estado del sistema. Utiliza una base de datos relacional PostgreSQL gestionada mediante Spring Data JPA (repository) y controlada por scripts de migración estructurados (db.migration) para almacenar perfiles de usuario e historial de análisis
 
+
 # 3. Arquitectura de Infraestructura (OCI Cloud)
 El despliegue de la infraestructura está centralizado en un entorno virtualizado en la nube con la siguiente configuración:
 
@@ -49,11 +48,12 @@ Red Virtual (VCN): Rango de red principal 10.0.0.0/16.
 
 * Reglas de Seguridad (Security List):
 
-  * SSH (22): Administración remota.
+    * SSH (22): Administración remota.
 
-  * PostgreSQL (5432): Acceso a la base de datos (según sea necesario).
-
-  * TCP (8080): Acceso a la API Java 21.
+    
+    * PostgreSQL (5432): Acceso a la base de datos (según sea necesario).
+    
+    *  TCP (8080): Acceso a la API Java 21.
 
 # Servidor y Contenedores
 Instancia de Cómputo: Servidor virtual en OCI sobre una VM Ampere A1.Flex ejecutando el sistema operativo Ubuntu.
@@ -62,4 +62,4 @@ Entorno de Ejecución: Por ahora, pruebas en PC de desarrollo, conectado a Postg
 
 Contenedor de la Aplicación: Motor de BD PostgreSQL, Base de datos relacional vinculada al puerto 5432.
 
-Aplicación (Backend): se sirve al tráfico web en el puerto TCP 8080. El backend es el artefacto `energiai-api-0.0.1-SNAPSHOT.jar` (Spring Boot, JDK 21), generado con `mvn package` y ejecutado con `java -jar`, con perfil `prod` para la VM OCI y `SPRING_DATASOURCE_URL` apuntando a `localhost` si la base corre en la misma máquina.
+Aplicación (Backend): se sirve al tráfico web en el puerto TCP 8080. El backend es el artefacto **`energiai-api-0.0.1-SNAPSHOT.jar`** (Spring Boot, JDK 21), generado con `mvn package` y ejecutado con `java -jar`, con perfil `prod` para la VM OCI y `SPRING_DATASOURCE_URL` apuntando a `localhost` si la base corre en la misma máquina.
