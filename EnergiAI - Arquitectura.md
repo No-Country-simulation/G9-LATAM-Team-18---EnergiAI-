@@ -4,6 +4,7 @@ title: EnergiAI - Arquitectura
 ---
 
 <img src="https://hackmd.io/_uploads/SyWOvF8wzg.png" width="55%">
+
 # 1. Visión General del Sistema
 El sistema se compone de una aplicación web moderna orientada a servicios, donde la lógica de negocio central integra un motor de Inteligencia Artificial (desarrollado por Ana y Erick). La solución combina una arquitectura de código desacoplada en capas y un despliegue optimizado en la nube sobre Oracle Cloud Infrastructure (OCI).
 
